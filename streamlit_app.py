@@ -105,7 +105,7 @@ if tab == "Home":
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    def city_from_coords(lat, long):
+    def city_from_coords(lat, lon):
         url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
         response = requests.get(url)
         data = response.json()
@@ -116,22 +116,14 @@ if tab == "Home":
         return "Unknown Location"
 
     def create_map(lat, lon, zoom=5):
-        m = folium.Map(location=[40.0, -120.0], zoom_start=5)
+        m = folium.Map(location=[lat, lon], zoom_start=zoom)
         
         geojson_url = "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
         geojson_data = requests.get(geojson_url).json()
 
         folium.GeoJson(geojson_data, name="countries").add_to(m)
 
-        def on_click(event):
-            lat_click = event.latlng.lat
-            long_click = event.latlng.lng
-
-            city = city_from_coords(lat_click, long_click)
-
-            folium.Popup(f"{city}").add_to(folium.Marker([lat_click, long_click]).add_to(m))
-
-        m.on_click(on_click)
+        folium.ClickForMarker(popup="Click for city.").add_to(m)
         return m
 
     # Initialize map
@@ -148,13 +140,15 @@ if tab == "Home":
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             latitude = clicked_location["lat"]
             longitude = clicked_location["lng"]
+
+            city = city_from_coords(latitude, longitude)
                         
-    # Display latitude and longitude separately
             st.markdown(
                 f"""
                 <p style='text-align: center;'>
                     <strong>Latitude:</strong> {latitude:.6f} <br>
-                    <strong>Longitude:</strong> {longitude:.6f}
+                    <strong>Longitude:</strong> {longitude:.6f} <br>
+                    <strong>City:</strong> {city}
                 </p>
                 """,
                 unsafe_allow_html=True,
