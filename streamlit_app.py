@@ -61,12 +61,12 @@ st.markdown("""
     }
     h1, h3 {
         color: #005F60; 
-        font-family: 'Tahoma', sans-serif;
+        font-family: 'Roboto', sans-serif;
     }
 
     p {
         color: #003B2D; 
-        font-family: 'Tahoma', sans-serif;
+        font-family: 'Roboto', sans-serif;
     }
 
     .map-container {
@@ -93,14 +93,14 @@ tab = query_params.get("page", ["Home"])[0]  # Default to "home" if no parameter
 if tab == "Home":
     # Click
     st.markdown("""
-        <h1 style='font-family: Tahoma; font-size: 50px; text-align: center'>Predictor</h1>
-        <p style='font-family: Tahoma; font-size: 20px; text-align: center; padding-right: 10px;'>&nbsp;Prediction Model</p>
+        <h1 style='font-family: Roboto; font-size: 50px; text-align: center'>Predictor</h1>
+        <p style='font-family: Roboto; font-size: 20px; text-align: center; padding-right: 10px;'>&nbsp;Prediction Model</p>
     """, unsafe_allow_html=True)
     st.write('')
     st.write('')
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    st.markdown("<h3 style='text-align: center; font-family: 'Tahoma''>Click on the map to select a location:</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; font-family: 'Roboto''>Click on the map to select a location:</h3>", unsafe_allow_html=True)
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
