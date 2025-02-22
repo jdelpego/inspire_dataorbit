@@ -65,7 +65,7 @@ st.markdown("""
     }
 
     p {
-        color: #003B2D; 
+        color: #3E5C5B; 
         font-family: 'Roboto', sans-serif;
     }
 
