@@ -1,6 +1,7 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
+import requests
 
 #navigation bar
 st.markdown("""
@@ -104,12 +105,34 @@ if tab == "Home":
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
+    def city_from_coords(lat, long):
+        url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
+        response = requests.get(url)
+        data = response.json()
+
+        if 'address' in data:
+            city = data['address'].get('city', 'unknown') 
+            return city
+        return "Unknown Location"
+
     def create_map(lat, lon, zoom=5):
         m = folium.Map(location=[40.0, -120.0], zoom_start=5)
-        folium.Marker(location=[40.0, -120.0]).add_to(m) 
-        m.add_child(folium.ClickForMarker()) # Add click functionality to the map
-        return m
+        
+        geojson_url = "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
+        geojson_data = requests.get(geojson_url).json()
 
+        folium.GeoJson(geojson_data, name="countries").add_to(m)
+
+        def on_click(event):
+            lat_click = event.latlng.lat
+            long_click = event.latlng.lng
+
+            city = city_from_coords(lat_click, long_click)
+
+            folium.Popup(f"{city}").add_to(folium.Marker([lat_click, long_click]).add_to(m))
+
+        m.on_click(on_click)
+        return m
 
     # Initialize map
     m = create_map(40.0, -120.0)
