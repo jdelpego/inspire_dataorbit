@@ -1,7 +1,6 @@
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
-import requests
+import pydeck as pdk
+from geopy.geocoders import Nominatim
 
 #navigation bar
 st.markdown("""
@@ -105,70 +104,83 @@ if tab == "Home":
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    @st.cache_data
-    def city_from_coords(lat, lon):
-        url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
-        headers = {
-            "User-Agent": "inspiregroup/1.0 (samprita@ucsb.edu)"
-        }
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
+    geolocator = Nominatim(user_agent="inspire-app")
 
-            if 'address' in data:
-                city = data['address'].get('city', 'unknown') 
-                return city
-            return "Unknown Location"
-        except requests.exceptions.RequestException as e:
-            st.error(f"Error with geocoding request: {e}")
-            return "Error in geocoding request"
-        except ValueError as e:
-            # Handle JSON decoding errors
-            st.error(f"Error parsing the response: {e}")
-            return "Error parsing response"
+    def cityzip_from_coords(lat, lon):
+        try:
+            location = geolocator.reverse((lat, lon), language="en", exactly_one=True)
+            if location:
+                address = location.raw.get("address", {})
+                city = address.get("city", "Unknown")
+                zipcode = address.get("postcode", "Unknown")
+                return city, zipcode
+            return "Unknown Location", "Unknown Zipcode"
+        except Exception as e:
+            st.error(f"Error during geocoding: {e}")
+            return "Error", "Error"
 
 
     def create_map(lat, lon, zoom=5):
-        m = folium.Map(location=[lat, lon], zoom_start=zoom)
-        
-        geojson_url = "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson"
-        geojson_data = requests.get(geojson_url).json()
+        return pdk.Deck(
+            initial_view_state=pdk.ViewState(
+                latitude=40.7128,  
+                longitude=-74.0060,
+                zoom=5,
+                pitch=0
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    [],
+                    get_position="[longitude, latitude]",
+                    get_radius=20000,
+                    get_fill_color=[255, 0, 0],
+                    pickable=True,
+                    opacity=0.5
+                ),
+            ]
+        )
 
-        folium.GeoJson(geojson_data, name="countries").add_to(m)
-
-        folium.ClickForMarker(popup="Click for city.").add_to(m)
-        return m
-
-    # Initialize map
-    m = create_map(40.0, -120.0)
+    st.title("Sea level Rise Prediction")
+    st.markdown("""
+    <style>
+    .map-container {
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+    
+    map = create_map()
+    st.pydeck_chart(map)
    
-    # Render map 
-    map_result = st_folium(m, width=700)
+    if st.session_state.get("last_clicked", None): 
+       lat, lon = st.session_state["last_clicked"]
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    city, zipcode = cityzip_from_coords(lat, lon)
 
-    if map_result and "last_clicked" in map_result: 
-        clicked_location = map_result["last_clicked"]
+    st.markdown(f"""
+        <p style='text-align: center;'>
+            <strong>Latitude:</strong> {lat:.6f} <br>
+            <strong>Longitude:</strong> {lon:.6f} <br>
+            <strong>City:</strong> {city} <br>
+            <strong>Zipcode:</strong> {zipcode}
+        </p>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
-            latitude = clicked_location["lat"]
-            longitude = clicked_location["lng"]
+    def on_click(event):
+        lat = event["latitude"]
+        lon = event["longitude"]
 
-            city = city_from_coords(latitude, longitude)
-                        
-            st.markdown(
-                f"""
-                <p style='text-align: center;'>
-                    <strong>Latitude:</strong> {latitude:.6f} <br>
-                    <strong>Longitude:</strong> {longitude:.6f} <br>
-                    <strong>City:</strong> {city}
-                </p>
-                """,
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown("<p style='text-align: center;'>Please click on the map.</p>", unsafe_allow_html=True)
+        st.session_state["last_clicked"] = (lat, lon)
+
+        st.experimental_rerun()
+
+    map.on_click(on_click)
+
+    st.markdown("<p style='text-align: center;'>Please click on the map.</p>", unsafe_allow_html=True)
 
     st.markdown("<p style='text-align: center; '>This model predicts the likelihood of coastal shrinkage and its effects on house pricing.</p>", unsafe_allow_html=True)
 
