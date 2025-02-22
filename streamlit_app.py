@@ -108,6 +108,9 @@ if tab == "Home":
     @st.cache_data
     def city_from_coords(lat, lon):
         url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
+        headers = {
+            "User-Agent": "inspiregroup/1.0 (samprita@ucsb.edu)"
+        }
         try:
             response = requests.get(url)
             response.raise_for_status()
