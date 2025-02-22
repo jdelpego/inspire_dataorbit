@@ -108,13 +108,23 @@ if tab == "Home":
     @st.cache_data
     def city_from_coords(lat, lon):
         url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
-        response = requests.get(url)
-        data = response.json()
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
 
-        if 'address' in data:
-            city = data['address'].get('city', 'unknown') 
-            return city
-        return "Unknown Location"
+            if 'address' in data:
+                city = data['address'].get('city', 'unknown') 
+                return city
+            return "Unknown Location"
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error with geocoding request: {e}")
+            return "Error in geocoding request"
+        except ValueError as e:
+            # Handle JSON decoding errors
+            st.error(f"Error parsing the response: {e}")
+            return "Error parsing response"
+
 
     def create_map(lat, lon, zoom=5):
         m = folium.Map(location=[lat, lon], zoom_start=zoom)
