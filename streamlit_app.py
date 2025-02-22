@@ -105,6 +105,7 @@ if tab == "Home":
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
+    @st.cache_data
     def city_from_coords(lat, lon):
         url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
         response = requests.get(url)
