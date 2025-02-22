@@ -7,13 +7,11 @@ st.markdown("""
     <style>
     .css-18e3th9 { 
         padding-top: 0rem; 	
-        padding-bottom: 0rem; 
-        background-color: #F4E1D2;    
+        padding-bottom: 0rem;    
     }
     body {
         margin: 0;
         padding: 0;
-        background-color: #F4E1D2;  
     }
     .navbar {
         background-color: #00A9A5;
@@ -95,7 +93,7 @@ tab = query_params.get("page", ["Home"])[0]  # Default to "home" if no parameter
 if tab == "Home":
     # Click
     st.markdown("""
-        <h1 style='font-family: Tahoma; font-size: 50px;'>Predictor</h1>
+        <h1 style='font-family: Tahoma; font-size: 50px; text-align: center'>Predictor</h1>
         <p style='font-family: Tahoma; font-size: 20px; text-align: center; padding-right: 10px;'>&nbsp;Prediction Model</p>
     """, unsafe_allow_html=True)
     st.write('')
