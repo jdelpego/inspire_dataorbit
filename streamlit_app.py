@@ -104,8 +104,8 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
-    flooding_levels = sea_level_rise >= altitude_mm
-    
+    flooding_levels = sea_level_rise >= altitude_mm*100
+
     if not any(flooding_levels):
         return None, None  # Location won't flood within max_years
     
@@ -225,7 +225,7 @@ if tab == "Home":
             lon = clicked_location["lng"]
             elevation = get_elevation(lat, lon)
             flooding_year, years_until = predict_flooding_year(
-                elevation*100, model, X, current_sea_level, current_year
+                elevation, model, X, current_sea_level, current_year
             )
 
     st.markdown(f"""
