@@ -3,17 +3,17 @@
 {% block content %}
 <div class="details-page">
     <div class="details-container chat-container">
-        <h2 class="title">Sea Level Rise Assistant</h2>
-        <p class="subtitle">Ask questions about sea level rise, climate change, and our predictions</p>
+        <h1 style="text-align: center; margin-top: 20px; color: #60a7f7;">🤖 Sea Level Rise Chatbot</h1>
+        <p class="subtitle" style="text-align: center; margin-bottom: 30px;">Ask about rising sea levels, its causes, and impacts!</p>
         
         <div class="chat-box" id="chat-box">
             <div class="message system-message">
-                Welcome! I'm your Sea Level Rise Assistant. I can help you understand sea level rise predictions, climate change impacts, information about Goleta and UCSB, and ways to combat climate change. What would you like to know?
+                Welcome! I'm your Sea Level Rise Assistant. Ask me anything about sea level rise, climate change impacts, or predictions for specific locations.
             </div>
         </div>
 
         <div class="chat-input-container">
-            <textarea id="chat-input" placeholder="Type your question here... (Press Enter to send, Shift+Enter for new line)" class="chat-input" rows="1"></textarea>
+            <textarea id="chat-input" placeholder="Enter your question about sea level rise..." class="chat-input" rows="1"></textarea>
             <button id="send-button" class="predict-button">
                 <span id="button-text">Send</span>
                 <div id="loading-spinner" class="spinner" style="display: none;"></div>
@@ -35,14 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const buttonText = document.getElementById('button-text');
     const loadingSpinner = document.getElementById('loading-spinner');
     let isProcessing = false;
-    let retryCount = 0;
-    const MAX_RETRIES = 2;
-
-    // Auto-resize textarea
-    chatInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
 
     function setLoading(isLoading) {
         isProcessing = isLoading;
@@ -55,29 +47,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(text, type = 'assistant') {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
-        
-        // Convert URLs to clickable links
-        const linkedText = text.replace(
-            /(https?:\/\/[^\s]+)/g, 
-            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
-        );
-        
-        messageDiv.innerHTML = linkedText;
+        messageDiv.textContent = text;
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    async function sendMessage(retry = false) {
+    async function sendMessage() {
         const message = chatInput.value.trim();
         if (!message || isProcessing) return;
 
-        if (!retry) {
-            setLoading(true);
-            addMessage(message, 'user');
-            chatInput.value = '';
-            chatInput.style.height = 'auto';
-            retryCount = 0;
-        }
+        setLoading(true);
+        addMessage(message, 'user');
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
 
         try {
             const response = await fetch('/chat', {
@@ -85,52 +67,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message }),
-                signal: AbortSignal.timeout(30000) // 30 second timeout
+                body: JSON.stringify({ message: message })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Server error');
-            }
-
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            if (!data.response) {
-                throw new Error('Empty response from server');
+                throw new Error(data.error || 'Failed to get response');
             }
 
             addMessage(data.response);
 
         } catch (error) {
             console.error('Error:', error);
-            
-            if (error.name === 'AbortError') {
-                addMessage('⚠️ Request timed out. Please try again.', 'error');
-            } else if (retryCount < MAX_RETRIES) {
-                addMessage(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`, 'system-message');
-                retryCount++;
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                return sendMessage(true);
-            } else {
-                addMessage('❌ ' + (error.message || 'Failed to get response. Please try again.'), 'error');
-            }
+            addMessage('❌ ' + (error.message || 'Failed to get response. Please try again.'), 'error');
         } finally {
-            if (!retry) {
-                setLoading(false);
-            }
+            setLoading(false);
         }
     }
 
-    sendButton.addEventListener('click', () => sendMessage(false));
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    sendButton.addEventListener('click', sendMessage);
     
     chatInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage(false);
+            sendMessage();
         }
     });
 
@@ -140,61 +107,85 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 1s ease-in-out infinite;
-    display: inline-block;
+.details-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 800px !important;
+    margin: 2rem auto;
+    box-shadow: 0 0 30px rgba(0, 153, 255, 0.3);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.chat-box {
+    height: 400px;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 51, 0.3);
+    border-radius: 15px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    resize: none;
+    min-height: 40px;
 }
 
 .predict-button {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1.5rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 100px;
 }
 
+.predict-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
 .predict-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-}
-
-.chat-input {
-    resize: none;
-    overflow-y: hidden;
-    min-height: 40px;
-    max-height: 150px;
-    line-height: 1.5;
-    color: white;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.chat-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    transform: none;
 }
 
 .message {
-    color: white;
-    font-size: 1rem;
-    line-height: 1.5;
     margin: 1rem 0;
     padding: 1rem;
     border-radius: 10px;
+    max-width: 80%;
     word-wrap: break-word;
+    color: white;
 }
 
-.error-message {
-    background: rgba(255, 59, 48, 0.1);
-    border: 1px solid rgba(255, 59, 48, 0.3);
-    color: #ff3b30;
+.system-message {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    margin: 0 auto 1rem auto;
+    text-align: center;
+    max-width: 100%;
 }
 
 .user-message {
@@ -202,37 +193,33 @@ document.addEventListener('DOMContentLoaded', function() {
     border: 1px solid rgba(74, 144, 226, 0.3);
     margin-left: auto;
     text-align: right;
-    max-width: 80%;
 }
 
 .assistant-message {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     margin-right: auto;
-    text-align: left;
-    max-width: 80%;
 }
 
-.message a {
-    color: #78b6ff;
-    text-decoration: underline;
-}
-
-.message a:hover {
-    color: #a8d1ff;
-}
-
-.system-message {
-    background: rgba(74, 144, 226, 0.1);
-    border: 1px solid rgba(74, 144, 226, 0.3);
+.error-message {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff3b30;
     text-align: center;
-    margin: 0 auto 1rem auto;
-    max-width: 100%;
+    margin: 1rem auto;
 }
 
-.chat-box {
-    background: rgba(0, 0, 51, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 </style>
 {% endblock %} 

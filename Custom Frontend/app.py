@@ -304,26 +304,15 @@ def chat_message():
         # Initialize Groq client
         client = groq.Groq(api_key=GROQ_API_KEY)
         
-        system_prompt = """You are a helpful assistant specializing in sea level rise and climate change. You have access to:
-        1. A Ridge regression model (alpha=40.0) trained on historical sea level data since 1880 and CO2 emissions
-        2. Elevation data from Google Maps API
-        3. Predictions that account for quadratic year trends and CO2 emissions
-
-        For Goleta specifically:
-        - Located near Santa Barbara, CA
-        - Average elevation: 13 meters
-        - Contains UCSB and Goleta Beach
-        - Vulnerable to sea level rise due to coastal location
-
-        Provide clear, accurate information about sea level rise predictions and climate change impacts.
-        Keep responses concise and focused."""
-
         try:
+            # Simple direct completion like in Streamlit version
             completion = client.chat.completions.create(
                 model="mixtral-8x7b-32768",
                 messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message}
+                    {
+                        "role": "user",
+                        "content": message
+                    }
                 ],
                 temperature=0.7,
                 max_tokens=800,
@@ -332,17 +321,21 @@ def chat_message():
             )
             
             if not completion.choices or not completion.choices[0].message.content:
+                print("Received empty response from Groq API")
                 raise Exception("Empty response from Groq API")
                 
             response_text = completion.choices[0].message.content.strip()
+            print("Successfully received response from Groq")
             return jsonify({"response": response_text})
             
         except Exception as api_error:
             print(f"Groq API error: {str(api_error)}")
-            error_message = "The AI service is temporarily unavailable. Please try again in a moment."
             if "rate" in str(api_error).lower():
-                error_message = "The AI service is currently busy. Please wait a moment and try again."
-            return jsonify({"error": error_message}), 503
+                return jsonify({"error": "The AI service is currently busy. Please wait a moment and try again."}), 429
+            elif "authentication" in str(api_error).lower():
+                return jsonify({"error": "Authentication error with AI service. Please check API key."}), 401
+            else:
+                return jsonify({"error": "Failed to get response from AI service. Please try again."}), 503
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
