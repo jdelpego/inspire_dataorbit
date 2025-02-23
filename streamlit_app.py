@@ -10,6 +10,9 @@ import sys
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score, mean_squared_error
+from folium import MacroElement
+from jinja2 import Template
+
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
@@ -71,7 +74,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
 st.markdown("""
     <div class="navbar">
         <a href="?page=Home">🏠 Home</a>
@@ -79,6 +81,20 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+class ClearMarkerOnClick(MacroElement):
+    _template = Template(u"""
+        {% macro script(this, kwargs) %}
+        // Create a layer for the click marker and add it to the map
+        var markerLayer = L.layerGroup().addTo({{ this._parent.get_name() }});
+        // Listen for clicks on the map
+        {{ this._parent.get_name() }}.on('click', function(e) {
+            // Remove any existing marker
+            markerLayer.clearLayers();
+            // Add a new marker at the click location
+            L.marker(e.latlng).addTo(markerLayer);
+        });
+        {% endmacro %}
+    """)
 
 def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
     """
@@ -198,9 +214,11 @@ def get_elevation(lat, lon):
 def create_map(lat, lon, zoom=5):
     m = folium.Map(location=[lat, lon], zoom_start=zoom)
     folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
-    m.add_child(folium.ClickForMarker())
+    m.add_child(ClearMarkerOnClick())
 
-    folium.Marker(location=[lat, lon]).add_to(m)
+    #m.add_child(folium.ClickForMarker())
+
+    #folium.Marker(location=[lat, lon]).add_to(m)
     return m
 
 # Get current page
