@@ -80,34 +80,54 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ message: message }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Server error');
+            }
 
             const data = await response.json();
             
             if (data.error) {
-                if (retryCount < MAX_RETRIES) {
+                if (retryCount < MAX_RETRIES && response.status !== 401) {
                     retryCount++;
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5 seconds
                     return sendMessage(true);
                 }
-                addMessage('🚫 ' + data.error, 'error');
-            } else {
-                addMessage(data.response);
+                throw new Error(data.error);
             }
+
+            if (!data.response || typeof data.response !== 'string') {
+                throw new Error('Invalid response format from server');
+            }
+
+            addMessage(data.response);
+
         } catch (error) {
             console.error('Error:', error);
-            if (retryCount < MAX_RETRIES) {
+            
+            if (error.name === 'AbortError') {
+                addMessage('🚫 Request timed out. Please try again.', 'error');
+            } else if (retryCount < MAX_RETRIES && !error.message.includes('configuration')) {
                 retryCount++;
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5 seconds
                 return sendMessage(true);
+            } else {
+                addMessage('🚫 ' + (error.message || 'Connection error. Please try again.'), 'error');
             }
-            addMessage('🚫 Connection error. Please try again.', 'error');
         } finally {
             setLoading(false);
         }

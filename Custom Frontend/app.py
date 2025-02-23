@@ -330,8 +330,18 @@ def chat_message():
                 max_tokens=1024,
                 top_p=1,
                 stream=False,
-                timeout=15  # 15 second timeout
+                timeout=30  # Increased timeout to 30 seconds
             )
+            
+            if not completion or not hasattr(completion, 'choices') or not completion.choices:
+                raise Exception("Invalid response from Mixtral model")
+                
+            response_content = completion.choices[0].message.content
+            if not response_content:
+                raise Exception("Empty response from Mixtral model")
+                
+            return jsonify({"response": response_content})
+            
         except Exception as model_error:
             print(f"Mixtral model error: {str(model_error)}")
             try:
@@ -346,34 +356,42 @@ def chat_message():
                     max_tokens=1024,
                     top_p=1,
                     stream=False,
-                    timeout=15  # 15 second timeout
+                    timeout=30  # Increased timeout to 30 seconds
                 )
+                
+                if not completion or not hasattr(completion, 'choices') or not completion.choices:
+                    raise Exception("Invalid response from Llama model")
+                    
+                response_content = completion.choices[0].message.content
+                if not response_content:
+                    raise Exception("Empty response from Llama model")
+                    
+                return jsonify({"response": response_content})
+                
             except Exception as fallback_error:
                 print(f"Fallback model error: {str(fallback_error)}")
                 if "timeout" in str(fallback_error).lower():
                     return jsonify({"error": "The AI service is taking too long to respond. Please try again."}), 504
+                if "rate" in str(fallback_error).lower():
+                    return jsonify({"error": "The AI service is currently busy. Please wait a moment and try again."}), 429
                 return jsonify({"error": "AI models are currently unavailable. Please try again later."}), 503
-
-        if not completion or not completion.choices:
-            return jsonify({"error": "No response generated. Please try again."}), 500
-
-        response_content = completion.choices[0].message.content if hasattr(completion.choices[0].message, 'content') else None
-        
-        if not response_content:
-            return jsonify({"error": "Empty response from AI model. Please try again."}), 500
-
-        return jsonify({"response": response_content})
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
         error_message = "An error occurred while processing your message. Please try again."
-        if "rate limit" in str(e).lower():
+        status_code = 500
+        
+        if "timeout" in str(e).lower():
+            error_message = "The request took too long to process. Please try again."
+            status_code = 504
+        elif "rate" in str(e).lower():
             error_message = "The AI service is currently busy. Please wait a moment and try again."
+            status_code = 429
         elif "api key" in str(e).lower():
             error_message = "There's an issue with the AI service configuration. Please try again later."
-        elif "timeout" in str(e).lower():
-            error_message = "The request took too long to process. Please try again."
-        return jsonify({"error": error_message}), 500
+            status_code = 401
+            
+        return jsonify({"error": error_message}), status_code
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
