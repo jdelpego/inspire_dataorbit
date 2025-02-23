@@ -310,7 +310,7 @@ if tab == "Home" or tab == None:
 
     st.markdown("""
         <p style='text-align: center; margin-top: 40px;'>Please click on the map.</p>
-        <p style='text-align: center;'>This model predicts when a place will sink due to rising sea levels.</p>
+        <p style='text-align: center; color: #007BFF;'>This model predicts when a place will sink due to rising sea levels.</p>
         <div style='text-align: center; font-size: 14px; color: gray;'>
             <p>©Inspire, Inc.</p>
         </div>
