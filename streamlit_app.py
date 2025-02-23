@@ -124,8 +124,8 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     future_levels = model.predict(poly.transform(extended_X))
 
     # ✅ **Limit sea level rise to a max possible value**
-    max_sea_level_by_2100 = base_sea_level + 2300  # 2.3m (2300mm) rise cap
-    max_sea_level_by_2200 = base_sea_level + 10000  # 10m (10,000mm) rise cap
+    max_sea_level_by_2100 = base_sea_level + 3000  # 2.3m (2300mm) rise cap
+    max_sea_level_by_2200 = base_sea_level + 15000  # 10m (10,000mm) rise cap
 
     for i, year in enumerate(years_needed):
         if year <= 2100:
