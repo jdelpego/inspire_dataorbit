@@ -22,8 +22,8 @@ from bokeh.models import ColumnDataSource, HoverTool
 from sklearn.linear_model import Ridge
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
-groq_api_key = st.secrets["api_key"]["groqapi_key"]
-openai_api_key = st.secrets["api_key"]["openai_key"]
+groqapi_key = st.secrets["api_key"]["groqapi_key"]
+openai_key = st.secrets["api_key"]["openai_key"]
 
 st.markdown("""
     <style>
