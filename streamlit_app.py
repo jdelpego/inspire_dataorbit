@@ -14,7 +14,6 @@ from sklearn.metrics import r2_score, mean_squared_error
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
-# Navigation bar
 st.markdown("""
     <style>
     .css-18e3th9 { 
@@ -29,28 +28,32 @@ st.markdown("""
     .navbar {
         position: fixed;
         background-color: #00A9A5 !important;
-        padding: 5px;
+        padding: 15px;
         text-align: center;
         top: 0;
         left: 0;
         right: 0;
         width: 100%;
-        z-index: 9999 !important;
+        z-index: 10000 !important; /* Ensure navbar stays on top */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+
     }
     .navbar a {
         color: white !important;
-        padding: 7px 10px !important;
+        padding: 12px 20px !important;
         text-decoration: none !important; 
-        font-size: 18px !important;
+        font-size: 20px !important;
+        font-weight: bold;
         display: inline-block !important;
+        transition: all 0.3s ease;
     }
     .navbar a:hover {
         background-color: #99E1D9;
         color: black !important;
-        transition: 0.3s ease-in !important;
+        border-radius: 5px;
     }
     .content {
-        margin-top: 50px !important;
+        margin-top: 70px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -58,8 +61,8 @@ st.markdown("""
 
 st.markdown("""
     <div class="navbar">
-        <a href="?page=Home">Home</a>
-        <a href="?page=resources">Resources</a>
+        <a href="?page=Home">🏠 Home</a>
+        <a href="?page=resources">📚 Resources</a>
     </div>
 """, unsafe_allow_html=True)
 
@@ -190,10 +193,10 @@ tab = query_params.get("page", ["Home"])[0]
 if tab == "Home":
     st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
-        <h1 style='text-align: center'>Predictor</h1>
+        <h1 style='text-align: center; color: #333;'>🌊 Sea Level Predictor</h1>
         <p style='text-align: center;'>Prediction Model</p>
     """, unsafe_allow_html=True)
-    
+
     lat, lon = 34.4356, -119.8276
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
@@ -220,9 +223,9 @@ if tab == "Home":
     
     st.markdown(f"""
     <div style="text-align: center; font-size: 18px;">
-        <p><strong>Latitude:</strong> {lat}</p>
-        <p><strong>Longitude:</strong> {lon}</p>
-        <p><strong>Altitude:</strong> {elevation:.2f} meters</p>
+        <p><strong>📍Latitude:</strong> {lat}</p>
+        <p><strong>📍Longitude:</strong> {lon}</p>
+        <p><strong>📏Altitude:</strong> {elevation:.2f} meters</p>
     </div>
 """, unsafe_allow_html=True)
 
