@@ -1,6 +1,0 @@
-[theme]
-backgroundColor="#FFFFFF"
-base = "light"
-
-[global]
-font = "serif"
