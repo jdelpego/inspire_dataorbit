@@ -213,12 +213,12 @@ def get_elevation(lat, lon):
 @st.cache_data
 def create_map(lat, lon, zoom=5):
     m = folium.Map(location=[lat, lon], zoom_start=zoom)
-    folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
-    #m.add_child(ClearMarkerOnClick())
+    #folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
+    m.add_child(ClearMarkerOnClick())
 
-    m.add_child(folium.ClickForMarker())
+    #m.add_child(folium.ClickForMarker())
 
-    folium.Marker(location=[lat, lon]).add_to(m)
+    #folium.Marker(location=[lat, lon]).add_to(m)
     return m
 
 # Get current page
@@ -252,8 +252,8 @@ if tab == "Home":
             flooding_year, years_until = predict_flooding_year(
                 elevation, model, X, current_sea_level, current_year
             )
-            m = create_map(lat, lon)
-            map_result = st_folium(m, width="100%", height=500)
+            #m = create_map(lat, lon)
+            #map_result = st_folium(m, width="100%", height=500)
 
     st.markdown(f"""
     <div style="text-align: center; font-size: 18px;">
