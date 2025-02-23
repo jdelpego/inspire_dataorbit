@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 from singlestoredb import connect
 from singlestoredb.exceptions import DatabaseError
-import seaborn as sns
 import sys
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
