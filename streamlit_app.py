@@ -205,9 +205,9 @@ def get_elevation(lat, lon):
         if result["status"] == "OK":
             return result["results"][0]["elevation"]
         else:
-            raise Exception("Status not OK getting elevation" + result)
+            raise Exception("Status not OK getting elevation" + str(result))
     else:
-        raise Exception("Error getting elevation 200 response" + result)
+        raise Exception("Error getting elevation 200 response" + str(result))
         return None
 
 @st.cache_data
