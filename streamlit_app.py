@@ -273,4 +273,30 @@ if tab == "Home":
     st.markdown('<div class="content">', unsafe_allow_html=True)
 
 elif tab == "resources":
-    st.write("Resources page content here.")
+    st.title("Help Mitigate Rising Sea Levels!")
+# Display information using markdown and HTML
+    st.markdown(
+        """
+        ## Reduce Climate Change Through Carbon Emissions
+        The primary driver of sea level rise is climate change, which causes thermal expansion of water and melting of polar ice caps.
+        To curb sea level rise, we need to reduce global greenhouse gas emissions.
+
+        **Some ways to do this at home:**
+        - Limit your driving time
+        - Switch to an electric vehicle
+        - Upgrade to energy-efficient appliances
+        - Shift to renewable energy sources
+
+        ## Protecting and Restoring Natural Ecosystems
+        Wetlands and salt marshes act as natural barriers, absorbing floodwaters and reducing storm surges.
+        Protecting and restoring these ecosystems can help buffer coastal areas from rising seas.
+
+        Additionally, planting trees and restoring forests can help absorb carbon dioxide and reduce the greenhouse effect, slowing climate change.
+
+        ### Some Further Resources:
+        - [National Oceanic and Atmospheric Administration (NOAA)](https://www.noaa.gov/): Provides data, resources, and research on sea level rise and its impacts.
+        - [Intergovernmental Panel on Climate Change (IPCC)](https://www.ipcc.ch/): Publishes regular reports on climate science, including the expected impacts of sea level rise.
+        - [The Nature Conservancy](https://www.nature.org/): Focuses on protecting natural ecosystems like mangroves and wetlands to mitigate sea level rise.
+        - [UN Environment Programme](https://www.unep.org/): Offers guidelines and frameworks for managing climate change and its effects, including sea level rise.
+        """,
+        unsafe_allow_html=True)
