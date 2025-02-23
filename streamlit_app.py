@@ -45,7 +45,7 @@ st.markdown("""
     }
             
     .content {
-        margin-top: 50px;
+        margin-top: 20px;
     }
 
     .navbar a {
