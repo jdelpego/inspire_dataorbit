@@ -290,13 +290,12 @@ if tab == "Home" or tab == None:
     else:
         predict_url = None
 
-    # Predict Button (styled)
     st.markdown("""
         <style>
         .predict-button {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .predict-button a {
             background-color: #007BFF;
