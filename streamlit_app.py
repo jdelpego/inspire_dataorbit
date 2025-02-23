@@ -207,7 +207,7 @@ def get_elevation(lat, lon):
         else:
             raise Exception("Status not OK getting elevation" + str(result) + google_maps_api_key)
     else:
-        raise Exception("Error getting elevation 200 response" + str(result) + google_maps_api_key)
+        raise Exception("Error getting elevation 200 response" + google_maps_api_key)
         return None
 
 @st.cache_data
