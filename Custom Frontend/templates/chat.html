@@ -85,15 +85,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ message: message }),
+                signal: AbortSignal.timeout(30000) // 30 second timeout
             });
 
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                throw new Error('Failed to parse server response');
-            }
+            const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.error || 'Server error');
@@ -103,8 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.error);
             }
 
-            if (!data.response || typeof data.response !== 'string') {
-                throw new Error('Invalid response format from server');
+            if (!data.response) {
+                throw new Error('Empty response from server');
             }
 
             addMessage(data.response);
@@ -112,20 +108,15 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             
-            const errorMessage = error.message || 'Connection error. Please try again.';
-            
-            // Don't retry on certain errors
-            if (errorMessage.includes('configuration') || 
-                errorMessage.includes('Invalid response format') ||
-                errorMessage.includes('Failed to parse')) {
-                addMessage('🚫 ' + errorMessage, 'error');
+            if (error.name === 'AbortError') {
+                addMessage('⚠️ Request timed out. Please try again.', 'error');
             } else if (retryCount < MAX_RETRIES) {
-                console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
+                addMessage(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`, 'system-message');
                 retryCount++;
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 return sendMessage(true);
             } else {
-                addMessage('🚫 ' + errorMessage, 'error');
+                addMessage('❌ ' + (error.message || 'Failed to get response. Please try again.'), 'error');
             }
         } finally {
             if (!retry) {
