@@ -14,6 +14,7 @@ from folium import MacroElement
 from jinja2 import Template
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
+from sklearn.linear_model import Ridge
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
@@ -121,8 +122,12 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     
 
     # Make predictions
-    future_levels = model.predict(poly.transform(extended_X))
-    future_levels = model.predict(poly.transform(extended_X)) * 1.2
+    #future_levels = model.predict(poly.transform(extended_X))
+    #future_levels = model.predict(poly.transform(extended_X)) * 1.2
+
+    extended_X['year^2'] = extended_X['year']**2
+    # Keep Emissions as-is (no Emissions^2, no interaction).
+    future_levels = model.predict(extended_X[['year', 'year^2', 'Emissions']])
 
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
@@ -195,12 +200,19 @@ try:
     X = merged_df[['year', 'Emissions']]
     y = merged_df['sea_level']
 
+
+
     # Create quadratic features (degree=2) using PolynomialFeatures
-    poly = PolynomialFeatures(degree=2, include_bias=False)
-    X_poly = poly.fit_transform(X)
+    #poly = PolynomialFeatures(degree=2, include_bias=False)
+    #X_poly = poly.fit_transform(X)
 
     # Train the quadratic model using LinearRegression
-    model = LinearRegression()
+    #model = LinearRegression()
+    model = Ridge(alpha=40.0)  # alpha > 0 means more regularization
+    
+    X['year^2'] = X['year'] ** 2
+    X_poly = X[['year', 'year^2', 'Emissions']]
+
     model.fit(X_poly, y)
     current_year = merged_df['year'].max()
     current_sea_level = merged_df['sea_level'].iloc[-1]
