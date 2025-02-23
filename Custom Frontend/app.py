@@ -14,10 +14,17 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Get API key from environment variable
+# Get environment variables
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
-if not GOOGLE_MAPS_API_KEY:
-    raise ValueError("Missing Google Maps API Key")
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT', '3333')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_NAME = os.getenv('DB_NAME')
+
+if not all([GOOGLE_MAPS_API_KEY, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME]):
+    raise ValueError("Missing required environment variables")
+
 GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_API_KEY.strip('"\'')
 
 print(f"API Key loaded: {GOOGLE_MAPS_API_KEY[:10]}...")
@@ -39,11 +46,11 @@ def get_elevation(lat, lng):
 try:
     # Connect to SingleStore
     conn = connect(
-        host='svc-3482219c-a389-4079-b18b-d50662524e8a-shared-dml.aws-virginia-6.svc.singlestore.com',
-        port=3333,
-        user='jdelpego',
-        password='fTVuFI26cwOVwAB7WVWybNqcBTrUP9KE',
-        database='db_luke_503d4'
+        host=DB_HOST,
+        port=int(DB_PORT),
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
     )
 
     # Query sea level and CO2 data
