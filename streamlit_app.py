@@ -2,6 +2,12 @@ import streamlit as st
 import folium
 import requests
 from streamlit_folium import st_folium
+import pandas as pd
+import numpy as np
+from singlestoredb import connect
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import r2_score, mean_squared_error
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
