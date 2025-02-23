@@ -336,7 +336,6 @@ body {
 .header-actions {
     margin-bottom: 2rem;
     text-align: center;
-<<<<<<< HEAD
     display: flex;
     gap: 1.5rem;
     justify-content: center;
@@ -502,6 +501,74 @@ body {
     gap: 0.5rem;
     font-size: 1.1rem;
     backdrop-filter: blur(5px);
-=======
->>>>>>> 1f7c537c67de96488fe5fb64c74c7d0b868e889a
 }
+
+/* Chat Styles */
+.chat-container {
+    max-width: 900px !important;
+}
+
+.chat-box {
+    height: 400px;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 51, 0.3);
+    border-radius: 15px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: rgba(74, 144, 226, 0.5);
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.2);
+}
+
+.message {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.system-message {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    margin: 0 auto 1rem auto;
+    text-align: center;
+}
+
+.user-message {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    margin-left: auto;
+    text-align: right;
+}
+
+.assistant-message {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-right: auto;
+    text-align: left;
+}
+
+/* End Chat Styles */
