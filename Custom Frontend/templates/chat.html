@@ -8,13 +8,7 @@
         
         <div class="chat-box" id="chat-box">
             <div class="message system-message">
-                Hello! I'm your Sea Level Rise Assistant. I can help you understand:
-                • Our sea level rise predictions and methodology
-                • Climate change impacts on coastal areas
-                • Specific information about Goleta and UCSB
-                • Ways to help combat climate change
-                
-                What would you like to know?
+                Welcome! I'm your Sea Level Rise Assistant. I can help you understand sea level rise predictions, climate change impacts, information about Goleta and UCSB, and ways to combat climate change. What would you like to know?
             </div>
         </div>
 
@@ -41,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const buttonText = document.getElementById('button-text');
     const loadingSpinner = document.getElementById('loading-spinner');
     let isProcessing = false;
+    let retryCount = 0;
+    const MAX_RETRIES = 2;
 
     // Auto-resize textarea
     chatInput.addEventListener('input', function() {
@@ -71,14 +67,17 @@ document.addEventListener('DOMContentLoaded', function() {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    async function sendMessage() {
+    async function sendMessage(retry = false) {
         const message = chatInput.value.trim();
         if (!message || isProcessing) return;
 
-        setLoading(true);
-        addMessage(message, 'user');
-        chatInput.value = '';
-        chatInput.style.height = 'auto';
+        if (!retry) {
+            setLoading(true);
+            addMessage(message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            retryCount = 0;
+        }
 
         try {
             const response = await fetch('/chat', {
@@ -92,24 +91,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (data.error) {
+                if (retryCount < MAX_RETRIES) {
+                    retryCount++;
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                    return sendMessage(true);
+                }
                 addMessage('🚫 ' + data.error, 'error');
             } else {
                 addMessage(data.response);
             }
         } catch (error) {
             console.error('Error:', error);
-            addMessage('🚫 Sorry, I encountered an error. Please try again.', 'error');
+            if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                return sendMessage(true);
+            }
+            addMessage('🚫 Connection error. Please try again.', 'error');
         } finally {
             setLoading(false);
         }
     }
 
-    sendButton.addEventListener('click', sendMessage);
+    sendButton.addEventListener('click', () => sendMessage(false));
     
     chatInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            sendMessage(false);
         }
     });
 
@@ -151,12 +160,45 @@ document.addEventListener('DOMContentLoaded', function() {
     min-height: 40px;
     max-height: 150px;
     line-height: 1.5;
+    color: white;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.message {
+    color: white;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+    word-wrap: break-word;
 }
 
 .error-message {
     background: rgba(255, 59, 48, 0.1);
     border: 1px solid rgba(255, 59, 48, 0.3);
     color: #ff3b30;
+}
+
+.user-message {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    margin-left: auto;
+    text-align: right;
+    max-width: 80%;
+}
+
+.assistant-message {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-right: auto;
+    text-align: left;
+    max-width: 80%;
 }
 
 .message a {
@@ -171,7 +213,14 @@ document.addEventListener('DOMContentLoaded', function() {
 .system-message {
     background: rgba(74, 144, 226, 0.1);
     border: 1px solid rgba(74, 144, 226, 0.3);
-    white-space: pre-line;
+    text-align: center;
+    margin: 0 auto 1rem auto;
+    max-width: 100%;
+}
+
+.chat-box {
+    background: rgba(0, 0, 51, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
 {% endblock %} 

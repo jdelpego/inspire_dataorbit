@@ -315,10 +315,11 @@ def chat_message():
         - Vulnerable to sea level rise due to coastal location
 
         Provide clear, accurate information about sea level rise predictions and climate change impacts.
-        If you're unsure about something, say so rather than making assumptions."""
+        If you're unsure about something, say so rather than making assumptions.
+        Keep responses concise and focused."""
 
         try:
-            # First try mixtral model
+            # First try mixtral model with timeout
             completion = client.chat.completions.create(
                 model="mixtral-8x7b-32768",
                 messages=[
@@ -328,12 +329,13 @@ def chat_message():
                 temperature=0.7,
                 max_tokens=1024,
                 top_p=1,
-                stream=False
+                stream=False,
+                timeout=15  # 15 second timeout
             )
         except Exception as model_error:
             print(f"Mixtral model error: {str(model_error)}")
             try:
-                # Fallback to llama model
+                # Fallback to llama model with timeout
                 completion = client.chat.completions.create(
                     model="llama2-70b-4096",
                     messages=[
@@ -343,19 +345,22 @@ def chat_message():
                     temperature=0.7,
                     max_tokens=1024,
                     top_p=1,
-                    stream=False
+                    stream=False,
+                    timeout=15  # 15 second timeout
                 )
             except Exception as fallback_error:
                 print(f"Fallback model error: {str(fallback_error)}")
+                if "timeout" in str(fallback_error).lower():
+                    return jsonify({"error": "The AI service is taking too long to respond. Please try again."}), 504
                 return jsonify({"error": "AI models are currently unavailable. Please try again later."}), 503
 
         if not completion or not completion.choices:
-            return jsonify({"error": "No response generated"}), 500
+            return jsonify({"error": "No response generated. Please try again."}), 500
 
         response_content = completion.choices[0].message.content if hasattr(completion.choices[0].message, 'content') else None
         
         if not response_content:
-            return jsonify({"error": "Empty response from AI model"}), 500
+            return jsonify({"error": "Empty response from AI model. Please try again."}), 500
 
         return jsonify({"response": response_content})
 
@@ -366,6 +371,8 @@ def chat_message():
             error_message = "The AI service is currently busy. Please wait a moment and try again."
         elif "api key" in str(e).lower():
             error_message = "There's an issue with the AI service configuration. Please try again later."
+        elif "timeout" in str(e).lower():
+            error_message = "The request took too long to process. Please try again."
         return jsonify({"error": error_message}), 500
 
 if __name__ == '__main__':
