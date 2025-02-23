@@ -68,6 +68,9 @@ def get_elevation(lat, lon):
 def create_map(lat, lon, zoom=5):
     m = folium.Map(location=[lat, lon], zoom_start=zoom)
     folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
+    m.add_child(folium.ClickForMarker())
+
+    folium.Marker(location=[lat, lon]).add_to(m)
     return m
 
 # Get current page
@@ -83,23 +86,20 @@ if tab == "Home":
     
     lat, lon = 34.4356, -119.8276
 
-    m = folium.Map(location=[lat, lon], zoom_start=5)
-    marker = folium.Marker(location=[lat, lon], popup="Selected Location")
-    marker.add_to(m)
+    st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    map_result = st_folium(m, width=700, key="main_map")
+    m = create_map(lat, lon)
 
+    map_result = st_folium(m, width=700)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
+
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             latitude = clicked_location["lat"]
             longitude = clicked_location["lng"]
-
-    m = folium.Map(location=[lat, lon], zoom_start=5)
-    folium.Marker(location=[lat, lon], popup="Updated Location").add_to(m)
-
-    smap_result = st_folium(m, width=700, key="updated_map")
 
     elevation = get_elevation(lat, lon)
     st.write(f"**Default Latitude:** {lat}")
