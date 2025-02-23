@@ -80,33 +80,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
-
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message }),
-                signal: controller.signal
+                body: JSON.stringify({ message: message })
             });
 
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error');
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                throw new Error('Failed to parse server response');
             }
 
-            const data = await response.json();
-            
+            if (!response.ok) {
+                throw new Error(data.error || 'Server error');
+            }
+
             if (data.error) {
-                if (retryCount < MAX_RETRIES && response.status !== 401) {
-                    retryCount++;
-                    await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5 seconds
-                    return sendMessage(true);
-                }
                 throw new Error(data.error);
             }
 
@@ -119,17 +112,25 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             
-            if (error.name === 'AbortError') {
-                addMessage('🚫 Request timed out. Please try again.', 'error');
-            } else if (retryCount < MAX_RETRIES && !error.message.includes('configuration')) {
+            const errorMessage = error.message || 'Connection error. Please try again.';
+            
+            // Don't retry on certain errors
+            if (errorMessage.includes('configuration') || 
+                errorMessage.includes('Invalid response format') ||
+                errorMessage.includes('Failed to parse')) {
+                addMessage('🚫 ' + errorMessage, 'error');
+            } else if (retryCount < MAX_RETRIES) {
+                console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
                 retryCount++;
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5 seconds
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
                 return sendMessage(true);
             } else {
-                addMessage('🚫 ' + (error.message || 'Connection error. Please try again.'), 'error');
+                addMessage('🚫 ' + errorMessage, 'error');
             }
         } finally {
-            setLoading(false);
+            if (!retry) {
+                setLoading(false);
+            }
         }
     }
 

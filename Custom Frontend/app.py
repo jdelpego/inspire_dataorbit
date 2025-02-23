@@ -301,6 +301,7 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
+        # Initialize Groq client with API key from environment
         client = groq.Groq(api_key=GROQ_API_KEY)
         
         system_prompt = """You are a helpful assistant specializing in sea level rise and climate change. You have access to:
@@ -315,81 +316,84 @@ def chat_message():
         - Vulnerable to sea level rise due to coastal location
 
         Provide clear, accurate information about sea level rise predictions and climate change impacts.
-        If you're unsure about something, say so rather than making assumptions.
         Keep responses concise and focused."""
 
         try:
-            # First try mixtral model with timeout
-            completion = client.chat.completions.create(
-                model="mixtral-8x7b-32768",
+            # Try the versatile model first
+            chat_completion = client.chat.completions.create(
                 messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message}
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
                 ],
+                model="llama2-70b-4096",  # Using LLaMA2 70B model
                 temperature=0.7,
                 max_tokens=1024,
-                top_p=1,
-                stream=False,
-                timeout=30  # Increased timeout to 30 seconds
+                top_p=1
             )
             
-            if not completion or not hasattr(completion, 'choices') or not completion.choices:
-                raise Exception("Invalid response from Mixtral model")
-                
-            response_content = completion.choices[0].message.content
+            if not chat_completion or not hasattr(chat_completion, 'choices'):
+                raise Exception("Invalid response structure")
+            
+            response_content = chat_completion.choices[0].message.content
             if not response_content:
-                raise Exception("Empty response from Mixtral model")
-                
+                raise Exception("Empty response received")
+            
             return jsonify({"response": response_content})
             
         except Exception as model_error:
-            print(f"Mixtral model error: {str(model_error)}")
+            print(f"Primary model error: {str(model_error)}")
             try:
-                # Fallback to llama model with timeout
-                completion = client.chat.completions.create(
-                    model="llama2-70b-4096",
+                # Fallback to mixtral model
+                chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": message
+                        }
                     ],
+                    model="mixtral-8x7b-32768",  # Fallback to Mixtral model
                     temperature=0.7,
                     max_tokens=1024,
-                    top_p=1,
-                    stream=False,
-                    timeout=30  # Increased timeout to 30 seconds
+                    top_p=1
                 )
                 
-                if not completion or not hasattr(completion, 'choices') or not completion.choices:
-                    raise Exception("Invalid response from Llama model")
-                    
-                response_content = completion.choices[0].message.content
+                if not chat_completion or not hasattr(chat_completion, 'choices'):
+                    raise Exception("Invalid response structure from fallback model")
+                
+                response_content = chat_completion.choices[0].message.content
                 if not response_content:
-                    raise Exception("Empty response from Llama model")
-                    
+                    raise Exception("Empty response from fallback model")
+                
                 return jsonify({"response": response_content})
                 
             except Exception as fallback_error:
                 print(f"Fallback model error: {str(fallback_error)}")
-                if "timeout" in str(fallback_error).lower():
-                    return jsonify({"error": "The AI service is taking too long to respond. Please try again."}), 504
+                error_message = "AI models are currently unavailable. Please try again later."
                 if "rate" in str(fallback_error).lower():
-                    return jsonify({"error": "The AI service is currently busy. Please wait a moment and try again."}), 429
-                return jsonify({"error": "AI models are currently unavailable. Please try again later."}), 503
+                    error_message = "The AI service is currently busy. Please wait a moment and try again."
+                return jsonify({"error": error_message}), 503
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
         error_message = "An error occurred while processing your message. Please try again."
         status_code = 500
         
-        if "timeout" in str(e).lower():
-            error_message = "The request took too long to process. Please try again."
-            status_code = 504
+        if "api key" in str(e).lower():
+            error_message = "There's an issue with the AI service configuration. Please try again later."
+            status_code = 401
         elif "rate" in str(e).lower():
             error_message = "The AI service is currently busy. Please wait a moment and try again."
             status_code = 429
-        elif "api key" in str(e).lower():
-            error_message = "There's an issue with the AI service configuration. Please try again later."
-            status_code = 401
             
         return jsonify({"error": error_message}), status_code
 
