@@ -105,7 +105,7 @@ with st.container():
         st.markdown(f'<div class="info-value">{flooding_year:.0f}</div>', unsafe_allow_html=True)
     with info_col2:
         st.markdown('<div class="info-item">Time Remaining</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="info-value">{years_until:.0f} years</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="info-value">{years_until:,.0f} years</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
