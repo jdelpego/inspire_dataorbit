@@ -79,3 +79,5 @@ yarl==1.18.3
 requests
 singlestoredb
 scikit-learn
+bokeh==2.5.2
+pip install -r requirements.txt
