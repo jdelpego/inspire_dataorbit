@@ -39,7 +39,7 @@ MarkupSafe==3.0.2
 mdurl==0.1.2
 multidict==6.1.0
 narwhals==1.21.1
-numpy==2.2.1
+numpy==1.26.4
 openai==1.59.6
 orjson==3.10.14
 packaging==24.2
