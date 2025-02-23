@@ -213,7 +213,7 @@ def get_elevation(lat, lon):
 @st.cache_data
 def create_map(lat, lon, zoom=5):
     m = folium.Map(location=[lat, lon], zoom_start=zoom)
-    folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
+    #folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
     m.add_child(ClearMarkerOnClick())
 
     #m.add_child(folium.ClickForMarker())
