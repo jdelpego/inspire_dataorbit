@@ -44,18 +44,10 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     exp_model = np.polyfit(future_X['year'], log_emissions, 1, w=nweights)
 
     growth_rate_reduction = 1  # 80% of the original growth rate (i.e., a 20% decrease)
-    #growth_offset = 15         # adjust the intercept downward (tune this value)
     adjusted_slope = exp_model[0] * growth_rate_reduction
-    #adjusted_intercept = exp_model[1] + growth_offset
-    #adjusted_exp_model = [adjusted_slope, adjusted_intercept]    
-
-    #future_emissions = np.exp(np.polyval(adjusted_exp_model, years_needed))
 
     log_emissions_future = np.log(start_emission) + adjusted_slope * (years_needed - last_year)
     future_emissions = np.exp(log_emissions_future)
-
-
-    # Transform the projected future emissions:
 
     # Create extended prediction data
     extended_X = pd.DataFrame({
@@ -67,24 +59,20 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     slope_at_cutoff = calculate_cutoff_slope(model, CUTOFF_YEAR, last_emission, adjusted_slope, start_year)
 
     # Split predictions into pre-cutoff and post-cutoff
-    pre_cutoff_mask =  years_needed <= CUTOFF_YEAR
-    post_cutoff_mask = years_needed > CUTOFF_YEAR
+    pre_cutoff_mask = extended_X['year'] <= CUTOFF_YEAR
+    post_cutoff_mask = extended_X['year'] > CUTOFF_YEAR
 
     # Predict normally up to cutoff
-    future_predictions_pre = model.predict(future_X[pre_cutoff_mask])
+    future_predictions_pre = model.predict(extended_X[pre_cutoff_mask])
 
     # For post-cutoff, apply constant linear growth
-    cutoff_sea_level = future_predictions_pre[-1]
+    cutoff_sea_level = future_predictions_pre[-1] if len(future_predictions_pre) > 0 else base_sea_level
     post_cutoff_years = years_needed[post_cutoff_mask]
     future_predictions_post = cutoff_sea_level + slope_at_cutoff * (post_cutoff_years - CUTOFF_YEAR)
 
     # Combine predictions
     future_predictions = np.concatenate([future_predictions_pre, future_predictions_post])   
 
-
-    #extended_X['year^2'] = extended_X['year']**2
-    # Keep Emissions as-is (no Emissions^2, no interaction).
-    #future_levels = model.predict(extended_X[['year', 'year^2', 'Emissions']])
     # Find when sea level reaches the altitude
     sea_level_rise = future_predictions - base_sea_level
     flooding_levels = sea_level_rise >= altitude_mm
@@ -163,25 +151,15 @@ try:
     print(f"\nFinal number of years after merge: {len(merged_df)}")
     
     # Prepare features and target.
- 
     X = merged_df[['year', 'Emissions']]
     y = merged_df['sea_level']
     
-    # Create quadratic features (degree=2) using PolynomialFeatures
-    #poly = PolynomialFeatures(degree=2, include_bias=False)
-    #X_custom = poly.fit_transform(X)
-    X_custom = X
-    # Train the quadratic model using LinearRegression
-    #model = Ridge(alpha=5)  # alpha > 0 means more regularization
-    model = LinearRegression()  # alpha > 0 means more regularization
+    # Train the model
+    model = LinearRegression()
+    model.fit(X, y)
 
-    #X['year^2'] = X['year'] ** 2
-    #X_custom = X[['year', 'year^2', 'Emissions']]
-    model.fit(X_custom, y)
-
-        
     # Evaluate model performance on the training data
-    y_pred = model.predict(X_custom)
+    y_pred = model.predict(X)
     r2 = r2_score(y, y_pred)
     mse = mean_squared_error(y, y_pred)
     
@@ -190,21 +168,16 @@ try:
     last_emission = merged_df['Emissions'].max()
     future_years = np.arange(last_year + 1, last_year + 75)
     
-    weights =  co2_df['year'] - np.min(co2_df['year']) + 1
+    weights = co2_df['year'] - np.min(co2_df['year']) + 1
 
-    # Project future CO2 emissions using an exponential model on all available CO2 data.
-    # (Here we use the full CO2 dataset, without scaling, then scale the predictions as before.)
-    log_emissions = np.log(co2_df['Emissions'])  # Note: co2_df's Emissions are still unscaled here.
+    # Project future CO2 emissions using an exponential model
+    log_emissions = np.log(co2_df['Emissions'])
     years_for_exp = co2_df['year']
     exp_model = np.polyfit(years_for_exp, log_emissions, 1, w=weights)
     
-    #making adjustment to growth rate of exp model
-    growth_rate_reduction = 1  # 80% of the original growth rate (i.e., a 20% decrease)
+    # Making adjustment to growth rate of exp model
+    growth_rate_reduction = 1
     adjusted_slope = exp_model[0] * growth_rate_reduction
-    #growth_offset = 15         # adjusted_intercept = exp_model[1] + growth_offset 
-    #adjusted_intercept = exp_model[1] + growth_offset
-    #adjusted_exp_model = [adjusted_slope, adjusted_intercept]    
-    #future_emissions = np.exp(np.polyval(adjusted_exp_model, future_years))
     
     log_future_emissions = np.log(last_emission) + adjusted_slope * (future_years - last_year)
     future_emissions = np.exp(log_future_emissions)
@@ -226,14 +199,16 @@ try:
     future_predictions_pre = model.predict(future_X[pre_cutoff_mask])
 
     # For post-cutoff, apply constant linear growth
-    cutoff_sea_level = future_predictions_pre[-1]
+    cutoff_sea_level = future_predictions_pre[-1] if len(future_predictions_pre) > 0 else y.iloc[-1]
     post_cutoff_years = future_years[post_cutoff_mask]
     future_predictions_post = cutoff_sea_level + slope_at_cutoff * (post_cutoff_years - CUTOFF_YEAR)
 
     # Combine predictions
     future_predictions = np.concatenate([future_predictions_pre, future_predictions_post])    
 
-    # -------------------------------\n    # Visualization\n    # -------------------------------
+    # -------------------------------
+    # Visualization
+    # -------------------------------
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
 
     # Get current (last known) sea level
@@ -245,7 +220,7 @@ try:
     # Plot flooding predictions for different altitudes
     for altitude in test_altitudes:
         flooding_year, years_until = predict_flooding_year(
-            altitude, model, X, current_sea_level, last_year, last_emission
+            altitude, model, future_X, current_sea_level, last_year, last_emission
         )
         
         if flooding_year is not None:
@@ -255,11 +230,9 @@ try:
                     f'{altitude/1000:.2f}m - Year {flooding_year}', 
                     verticalalignment='bottom')
 
-    # Plot 1: CO2 Emissions Projection (Graphing the emissions model)
-    # For historical data, rescale the emissions back to original by dividing by 0.1.
+    # Plot 1: CO2 Emissions Projection
     ax1.scatter(co2_df['year'], co2_df['Emissions'], 
                 color='green', alpha=0.5, label='Historical Emissions')
-    # For future emissions, plot the unscaled predicted values.
     ax1.plot(future_years, future_emissions, 
              color='darkgreen', linestyle='--', label='Projected Emissions (Exponential)')
     ax1.set_title('CO2 Emissions: Historical and Projected')
@@ -288,10 +261,9 @@ try:
              verticalalignment='top',
              bbox=dict(facecolor='white', alpha=0.8))
     
-    # Plot 2: Sea Level Predictions (Quadratic Model with Emissions and Year)
+    # Plot 2: Sea Level Predictions
     ax2.scatter(sea_level_df['year'], sea_level_df['sea_level'], 
                 color='blue', alpha=0.5, label='Historical Sea Level')
-    # In the plotting section:
     ax2.plot(future_years[pre_cutoff_mask], future_predictions_pre, 
          color='red', linestyle='--', label='Predicted Sea Level (Pre-Cutoff)')
     ax2.plot(future_years[post_cutoff_mask], future_predictions_post, 
@@ -299,14 +271,14 @@ try:
     ax2.axhline(y=0, color='gray', linestyle='-', alpha=0.3, label='1993-2008 Average')
     
     # Confidence intervals using training error as a proxy:
-    std_err = np.sqrt(np.sum((y - y_pred)**2) / (len(y) - X_custom.shape[1]))
+    std_err = np.sqrt(np.sum((y - y_pred)**2) / (len(y) - X.shape[1]))
     ax2.fill_between(future_years,
                      future_predictions - 2*std_err,
                      future_predictions + 2*std_err,
                      color='red', alpha=0.1,
                      label='95% Confidence Interval')
     
-    ax2.set_title('Sea Level Rise Prediction (Relative to 1993-2008 Average)\n(Quadratic Model with Year and Emissions)')
+    ax2.set_title('Sea Level Rise Prediction (Relative to 1993-2008 Average)')
     ax2.set_xlabel('Year')
     ax2.set_ylabel('Sea Level Change (mm relative to 1993-2008 average)')
     ax2.legend()
@@ -315,7 +287,7 @@ try:
     # Add model performance metrics
     metrics_text = (
         f'R² Score: {r2:.3f}\n'
-        f'(Quadratic Model with Year and Emissions)'
+        f'(Linear Model with Year and Emissions)'
     )
     ax2.text(0.05, 0.95, 
              metrics_text,
@@ -328,14 +300,14 @@ try:
     ax2.set_xlim(1950, future_years[-1])
 
     plt.tight_layout()
-    plt.savefig('co280%_sea_level_prediction.png', dpi=300, bbox_inches='tight')
+    plt.savefig('co2_sea_level_prediction.png', dpi=300, bbox_inches='tight')
     plt.close()
     
     # Print predictions with clear reference to baseline
     print("\nSea Level Rise Predictions (relative to 1993-2008 average):")
     print(f"Current sea level (Year {last_year}): {merged_df['sea_level'].iloc[-1]:.2f} mm")
-    print(f"Predicted sea level in {last_year + 5}: {future_predictions[-1]:.2f} mm")
-    print(f"Predicted rise over 5 years: {future_predictions[-1] - merged_df['sea_level'].iloc[-1]:.2f} mm")
+    print(f"Predicted sea level in {future_years[-1]}: {future_predictions[-1]:.2f} mm")
+    print(f"Predicted rise over {len(future_years)} years: {future_predictions[-1] - merged_df['sea_level'].iloc[-1]:.2f} mm")
     
 except Exception as e:
     print(f"Error during analysis: {e}")

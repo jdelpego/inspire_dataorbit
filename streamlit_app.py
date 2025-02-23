@@ -119,47 +119,78 @@ def get_groq_response(user_input):
     )
     return response.choices[0].message.content if response.choices else "No response."
         
-def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
+def calculate_cutoff_slope(model, cutoff_year, last_emission, emissions_growth_rate, last_year):
+    # Predict sea level just before and after cutoff to compute slope
+    years = np.array([cutoff_year - 1, cutoff_year, cutoff_year + 1])
+    
+    # Project emissions up to cutoff (exponential growth)
+    emissions = last_emission * np.exp(emissions_growth_rate * (years - last_year))
+    
+    # Predict sea levels
+    X_cutoff = pd.DataFrame({'year': years, 'Emissions': emissions})
+    predictions = model.predict(X_cutoff)
+    
+    # Calculate slope (mm/year) at cutoff
+    slope = (predictions[1] - predictions[0])  # Rate just before cutoff
+    return slope
+
+CUTOFF_YEAR = 2100  # Year when sea level transitions to constant linear rise
+
+def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, start_emission, max_years=1000):
     """
     Predict the year when a specific altitude will be flooded.
     altitude_mm: altitude in millimeters above current sea level
     max_years: maximum number of years to predict into the future
     """
     # Extend prediction range if needed
-    years_needed = np.arange(start_year + 1, start_year + max_years + 1) 
+    years_needed = np.arange(start_year + 1, start_year + max_years + 1)
 
-    nweights =  future_X['year'] - np.min(future_X['year']) + 1
-
+    nweights = future_X['year'] - np.min(future_X['year']) + 1
+     
     # Project CO2 emissions using exponential model
     log_emissions = np.log(future_X['Emissions'])
     exp_model = np.polyfit(future_X['year'], log_emissions, 1, w=nweights)
-    future_emissions = np.exp(np.polyval(exp_model, years_needed))
+
+    growth_rate_reduction = 1  # Original growth rate
+    adjusted_slope = exp_model[0] * growth_rate_reduction
+
+    log_emissions_future = np.log(start_emission) + adjusted_slope * (years_needed - start_year)
+    future_emissions = np.exp(log_emissions_future)
 
     # Create extended prediction data
     extended_X = pd.DataFrame({
         'year': years_needed,
         'Emissions': future_emissions
     })
-    
 
-    # Make predictions
-    #future_levels = model.predict(poly.transform(extended_X))
-    #future_levels = model.predict(poly.transform(extended_X)) * 1.2
+    # After generating future_years and future_emissions:
+    slope_at_cutoff = calculate_cutoff_slope(model, CUTOFF_YEAR, start_emission, adjusted_slope, start_year)
 
-    extended_X['year^2'] = extended_X['year']**2
-    # Keep Emissions as-is (no Emissions^2, no interaction).
-    future_levels = model.predict(extended_X[['year', 'year^2', 'Emissions']])
+    # Split predictions into pre-cutoff and post-cutoff
+    pre_cutoff_mask = extended_X['year'] <= CUTOFF_YEAR
+    post_cutoff_mask = extended_X['year'] > CUTOFF_YEAR
+
+    # Predict normally up to cutoff
+    future_predictions_pre = model.predict(extended_X[pre_cutoff_mask])
+
+    # For post-cutoff, apply constant linear growth
+    cutoff_sea_level = future_predictions_pre[-1] if len(future_predictions_pre) > 0 else base_sea_level
+    post_cutoff_years = years_needed[post_cutoff_mask]
+    future_predictions_post = cutoff_sea_level + slope_at_cutoff * (post_cutoff_years - CUTOFF_YEAR)
+
+    # Combine predictions
+    future_predictions = np.concatenate([future_predictions_pre, future_predictions_post])   
 
     # Find when sea level reaches the altitude
-    sea_level_rise = future_levels - base_sea_level
-    flooding_levels = sea_level_rise >= altitude_mm*1000
-
+    sea_level_rise = future_predictions - base_sea_level
+    flooding_levels = sea_level_rise >= altitude_mm
+    
     if not any(flooding_levels):
         return None, None  # Location won't flood within max_years
-
+    
     flooding_year = years_needed[flooding_levels][0]
     years_until_flooding = flooding_year - start_year
-
+    
     return flooding_year, years_until_flooding
 
 
@@ -217,22 +248,13 @@ try:
     X = merged_df[['year', 'Emissions']]
     y = merged_df['sea_level']
 
+    # Train the model
+    model = LinearRegression()
+    model.fit(X, y)
 
-
-    # Create quadratic features (degree=2) using PolynomialFeatures
-    #poly = PolynomialFeatures(degree=2, include_bias=False)
-    #X_poly = poly.fit_transform(X)
-
-    # Train the quadratic model using LinearRegression
-    #model = LinearRegression()
-    model = Ridge(alpha=40.0)  # alpha > 0 means more regularization
-    
-    X['year^2'] = X['year'] ** 2
-    X_poly = X[['year', 'year^2', 'Emissions']]
-
-    model.fit(X_poly, y)
     current_year = merged_df['year'].max()
     current_sea_level = merged_df['sea_level'].iloc[-1]
+    current_emission = merged_df['Emissions'].iloc[-1]
 except Exception as e:
     print(f"Error during analysis: {e}")
     print(f"Error details: {str(e)}")
@@ -293,8 +315,19 @@ if tab == "Home" or tab == None:
 
             if is_land(lat, lon):
                 elevation = get_elevation(lat, lon)
+                # Create future_X for prediction
+                future_years = np.arange(current_year + 1, current_year + 1000)
+                future_X = pd.DataFrame({
+                    'year': future_years,
+                    'Emissions': np.zeros_like(future_years)  # Will be updated in predict_flooding_year
+                })
                 flooding_year, years_until = predict_flooding_year(
-                    elevation, model, X, current_sea_level, current_year
+                    elevation * 1000,  # Convert elevation from meters to mm
+                    model, 
+                    future_X,
+                    current_sea_level,
+                    current_year,
+                    current_emission
                 )
             else:
                 st.warning("🌊 Please select a location on land")
