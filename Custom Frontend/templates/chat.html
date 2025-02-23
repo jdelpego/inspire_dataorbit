@@ -8,12 +8,18 @@
         
         <div class="chat-box" id="chat-box">
             <div class="message system-message">
-                Hello! I'm your Sea Level Rise Assistant. Feel free to ask me questions about sea level rise, our prediction model, or climate change in general.
+                Hello! I'm your Sea Level Rise Assistant. I can help you understand:
+                • Our sea level rise predictions and methodology
+                • Climate change impacts on coastal areas
+                • Specific information about Goleta and UCSB
+                • Ways to help combat climate change
+                
+                What would you like to know?
             </div>
         </div>
 
         <div class="chat-input-container">
-            <input type="text" id="chat-input" placeholder="Type your question here..." class="chat-input">
+            <textarea id="chat-input" placeholder="Type your question here... (Press Enter to send, Shift+Enter for new line)" class="chat-input" rows="1"></textarea>
             <button id="send-button" class="predict-button">
                 <span id="button-text">Send</span>
                 <div id="loading-spinner" class="spinner" style="display: none;"></div>
@@ -34,28 +40,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendButton = document.getElementById('send-button');
     const buttonText = document.getElementById('button-text');
     const loadingSpinner = document.getElementById('loading-spinner');
+    let isProcessing = false;
+
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
 
     function setLoading(isLoading) {
+        isProcessing = isLoading;
         sendButton.disabled = isLoading;
         buttonText.style.display = isLoading ? 'none' : 'inline';
         loadingSpinner.style.display = isLoading ? 'inline-block' : 'none';
+        chatInput.disabled = isLoading;
     }
 
-    function addMessage(text, isUser) {
+    function addMessage(text, type = 'assistant') {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}-message`;
+        
+        // Convert URLs to clickable links
+        const linkedText = text.replace(
+            /(https?:\/\/[^\s]+)/g, 
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        
+        messageDiv.innerHTML = linkedText;
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     async function sendMessage() {
         const message = chatInput.value.trim();
-        if (!message) return;
+        if (!message || isProcessing) return;
 
         setLoading(true);
-        addMessage(message, true);
+        addMessage(message, 'user');
         chatInput.value = '';
+        chatInput.style.height = 'auto';
 
         try {
             const response = await fetch('/chat', {
@@ -69,25 +92,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (data.error) {
-                addMessage('Sorry, I encountered an error. Please try again.', false);
+                addMessage('🚫 ' + data.error, 'error');
             } else {
-                addMessage(data.response, false);
+                addMessage(data.response);
             }
         } catch (error) {
             console.error('Error:', error);
-            addMessage('Sorry, I encountered an error. Please try again.', false);
+            addMessage('🚫 Sorry, I encountered an error. Please try again.', 'error');
         } finally {
             setLoading(false);
         }
     }
 
     sendButton.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
+    
+    chatInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
     });
+
+    // Focus input on page load
+    chatInput.focus();
 });
 </script>
 
@@ -116,6 +143,35 @@ document.addEventListener('DOMContentLoaded', function() {
 .predict-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+.chat-input {
+    resize: none;
+    overflow-y: hidden;
+    min-height: 40px;
+    max-height: 150px;
+    line-height: 1.5;
+}
+
+.error-message {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff3b30;
+}
+
+.message a {
+    color: #78b6ff;
+    text-decoration: underline;
+}
+
+.message a:hover {
+    color: #a8d1ff;
+}
+
+.system-message {
+    background: rgba(74, 144, 226, 0.1);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    white-space: pre-line;
 }
 </style>
 {% endblock %} 
