@@ -10,7 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score, mean_squared_error
 
 
-def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=200):
+def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
     """
     Predict the year when a specific altitude will be flooded.
     altitude_mm: altitude in millimeters above current sea level
