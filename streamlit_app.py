@@ -216,7 +216,7 @@ if tab == "Home":
     map_result = st_folium(m, width="100%", height=500)  
 
     st.markdown('</div>', unsafe_allow_html=True)
-    elevation = 0;
+    elevation = 0
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
 
