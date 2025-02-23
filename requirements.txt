@@ -81,4 +81,5 @@ singlestoredb
 scikit-learn
 bokeh==2.4.3
 wavio==0.0.5
-sounddevice==0.4.6
+speech_recognition
+

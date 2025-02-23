@@ -1,7 +1,7 @@
 import streamlit as st
 import openai
 import os
-import sounddevice as sd
+import speech_recognition as sr
 import wavio
 import tempfile
 import folium
@@ -106,15 +106,18 @@ class ClearMarkerOnClick(MacroElement):
         {% endmacro %}
     """)
 
-def record_audio(duration=5, samplerate=44100):
-    st.write("Recording... Speak now!")
-    audio = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='int16')
-    sd.wait()
-    
-    # Save the recording to a temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmpfile:
-        wavio.write(tmpfile.name, audio, samplerate, sampwidth=2)
-        return tmpfile.name
+def record_audio():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+    try:
+        text = recognizer.recognize_google(audio)
+        return text
+    except sr.UnknownValueError:
+        return "Sorry, I couldn't understand that."
+    except sr.RequestError:
+        return "Could not request results, please check your internet connection."
     
 def transcribe_audio(file_path):
     with open(file_path, "rb") as audio_file:
