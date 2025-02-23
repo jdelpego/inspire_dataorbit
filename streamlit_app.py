@@ -228,8 +228,8 @@ tab = query_params.get("page")
 if tab == "Home" or tab == None:
     st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
-        <h1 style='text-align: center; margin-top: 50px; color: #60a7f7;'>🌊 Sea Level Predictor</h1>
-        <p style='text-align: center;'>Prediction Model</p>
+        <h1 style='text-align: center; margin-top: 50px; color: #60a7f7;'>🌊 When Will Your House Sink?</h1>
+        <p style='text-align: center;'>A Rising Sea Level Prediction Model</p>
     """, unsafe_allow_html=True)
 
     lat, lon = 34.4356, -119.8276
