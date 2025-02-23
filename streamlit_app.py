@@ -129,7 +129,7 @@ def get_groq_response(user_input):
     response = groq_client.chat.completions.create(
         model="mixtral-8x7b-32768",
         messages=[
-            {"role": "system", "content": "You are AI assistant helping users understand the impact of rising sea levels. Please only provide information related to this topic."}, 
+            {"role": "system", "content": "You are an enthusiastic AI assistant helping users understand the impact of rising sea levels. Please only provide information related to this topic."}, 
             {"role": "user", "content": user_input}
         ]
     )
