@@ -133,6 +133,11 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     
     return flooding_year, years_until_flooding
 
+
+def is_land(lat, lon):
+    elevation = get_elevation(lat, lon)
+    return elevation > 0
+
 try:
     # Connect to SingleStore
     conn = connect(
@@ -252,10 +257,16 @@ if tab == "Home" or tab == None:
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             lat = clicked_location["lat"]
             lon = clicked_location["lng"]
-            elevation = get_elevation(lat, lon)
-            flooding_year, years_until = predict_flooding_year(
-                elevation, model, X, current_sea_level, current_year
-            )
+
+            if is_land(lat, lon):
+                elevation = get_elevation(lat, lon)
+                flooding_year, years_until = predict_flooding_year(
+                    elevation, model, X, current_sea_level, current_year
+                )
+            else:
+                st.warning("🌊 Please select a location on land")
+                flooding_year, years_until = None, None
+
             #m = create_map(lat, lon)
             #map_result = st_folium(m, width="100%", height=500)
 
