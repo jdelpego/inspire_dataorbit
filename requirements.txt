@@ -77,3 +77,7 @@ watchdog==6.0.0
 xyzservices==2024.9.0
 yarl==1.18.3
 requests
+singlestoredb
+sklearn.linear_model
+sklearn.preprocessing
+sklearn.metrics
