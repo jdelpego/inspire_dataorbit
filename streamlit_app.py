@@ -98,8 +98,8 @@ if tab == "Home":
         clicked_location = map_result["last_clicked"]
 
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
-            latitude = clicked_location["lat"]
-            longitude = clicked_location["lng"]
+            lat = clicked_location["lat"]
+            lon = clicked_location["lng"]
 
     elevation = get_elevation(lat, lon)
     st.write(f"**Default Latitude:** {lat}")
