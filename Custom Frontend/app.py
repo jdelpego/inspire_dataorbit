@@ -301,7 +301,7 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        # Initialize Groq client with API key from environment
+        # Initialize Groq client
         client = groq.Groq(api_key=GROQ_API_KEY)
         
         system_prompt = """You are a helpful assistant specializing in sea level rise and climate change. You have access to:
@@ -319,83 +319,34 @@ def chat_message():
         Keep responses concise and focused."""
 
         try:
-            # Try the versatile model first
-            chat_completion = client.chat.completions.create(
+            completion = client.chat.completions.create(
+                model="mixtral-8x7b-32768",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": message
-                    }
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
                 ],
-                model="llama2-70b-4096",  # Using LLaMA2 70B model
                 temperature=0.7,
-                max_tokens=1024,
-                top_p=1
+                max_tokens=800,
+                top_p=1,
+                stream=False
             )
             
-            if not chat_completion or not hasattr(chat_completion, 'choices'):
-                raise Exception("Invalid response structure")
+            if not completion.choices or not completion.choices[0].message.content:
+                raise Exception("Empty response from Groq API")
+                
+            response_text = completion.choices[0].message.content.strip()
+            return jsonify({"response": response_text})
             
-            response_content = chat_completion.choices[0].message.content
-            if not response_content:
-                raise Exception("Empty response received")
-            
-            return jsonify({"response": response_content})
-            
-        except Exception as model_error:
-            print(f"Primary model error: {str(model_error)}")
-            try:
-                # Fallback to mixtral model
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": system_prompt
-                        },
-                        {
-                            "role": "user",
-                            "content": message
-                        }
-                    ],
-                    model="mixtral-8x7b-32768",  # Fallback to Mixtral model
-                    temperature=0.7,
-                    max_tokens=1024,
-                    top_p=1
-                )
-                
-                if not chat_completion or not hasattr(chat_completion, 'choices'):
-                    raise Exception("Invalid response structure from fallback model")
-                
-                response_content = chat_completion.choices[0].message.content
-                if not response_content:
-                    raise Exception("Empty response from fallback model")
-                
-                return jsonify({"response": response_content})
-                
-            except Exception as fallback_error:
-                print(f"Fallback model error: {str(fallback_error)}")
-                error_message = "AI models are currently unavailable. Please try again later."
-                if "rate" in str(fallback_error).lower():
-                    error_message = "The AI service is currently busy. Please wait a moment and try again."
-                return jsonify({"error": error_message}), 503
+        except Exception as api_error:
+            print(f"Groq API error: {str(api_error)}")
+            error_message = "The AI service is temporarily unavailable. Please try again in a moment."
+            if "rate" in str(api_error).lower():
+                error_message = "The AI service is currently busy. Please wait a moment and try again."
+            return jsonify({"error": error_message}), 503
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        error_message = "An error occurred while processing your message. Please try again."
-        status_code = 500
-        
-        if "api key" in str(e).lower():
-            error_message = "There's an issue with the AI service configuration. Please try again later."
-            status_code = 401
-        elif "rate" in str(e).lower():
-            error_message = "The AI service is currently busy. Please wait a moment and try again."
-            status_code = 429
-            
-        return jsonify({"error": error_message}), status_code
+        return jsonify({"error": "An error occurred while processing your message. Please try again."}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
