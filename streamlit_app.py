@@ -56,11 +56,14 @@ st.markdown("""
         font-weight: bold;
         display: inline-block !important;
         transition: all 0.3s ease;
+        border-radius: 3px
     }
     .navbar a:hover {
         background-color: #99E1D9;
         color: black !important;
-        border-radius: 5px;
+        transition: 0.3s ease-in !important;
+        border-radius: 2px !important; /* Less rounding on hover */
+        padding: 6px 10px !important; 
     }
     .content {
         margin-top: 70px !important;
