@@ -312,25 +312,39 @@ def chat_message():
         - Includes a 2.5x multiplier for conservative estimates
         - Uses Google Maps API for elevation data
         
+        For Goleta specifically:
+        - Located near Santa Barbara, California
+        - Average elevation is about 13 meters above sea level
+        - Contains important areas like UCSB and Goleta Beach
+        
         Please provide accurate, informative responses about sea level rise, climate change, and our prediction methodology.
-        Keep responses concise and user-friendly."""
+        Keep responses concise and user-friendly. If asked about specific locations like Goleta, use the elevation data mentioned above."""
 
-        chat_completion = client.chat.completions.create(
+        # Create the chat completion
+        completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
             ],
             model="mixtral-8x7b-32768",
-            temperature=0.5,
-            max_tokens=500,
+            temperature=0.7,
+            max_tokens=800,
+            top_p=1,
+            stream=False
         )
 
-        response = chat_completion.choices[0].message.content
-        return jsonify({"response": response})
+        # Extract the response text
+        if completion and completion.choices and len(completion.choices) > 0:
+            response = completion.choices[0].message.content
+            if not response:
+                return jsonify({"error": "Empty response from AI"}), 500
+            return jsonify({"response": response})
+        else:
+            return jsonify({"error": "No response generated"}), 500
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return jsonify({"error": "Failed to process message"}), 500
+        return jsonify({"error": f"Failed to process message: {str(e)}"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
