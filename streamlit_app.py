@@ -233,6 +233,7 @@ if tab == "Home" or tab == None:
     """, unsafe_allow_html=True)
 
     lat, lon = 34.4356, -119.8276
+    flooding_year, years_until = 0.0, 0.0
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
