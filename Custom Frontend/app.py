@@ -301,60 +301,101 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        # Initialize Groq client with API key
-        client = groq.Groq(
-            api_key="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"
-        )
+        # Initialize Groq client with API key from environment
+        client = groq.Groq(api_key=GROQ_API_KEY)
         
-        # Create system prompt with context about the project
-        system_prompt = """You are a helpful AI assistant for a sea level rise prediction project. 
-        The project uses machine learning (Ridge regression) to predict when locations will be affected by sea level rise.
-        Key features:
-        - Uses historical sea level data and CO2 emissions
-        - Predicts flooding years based on elevation
-        - Includes a 2.5x multiplier for conservative estimates
-        - Uses Google Maps API for elevation data
-        
+        system_prompt = """You are a helpful assistant specializing in sea level rise and climate change. You have access to:
+        1. A Ridge regression model (alpha=40.0) trained on historical sea level data since 1880 and CO2 emissions
+        2. Elevation data from Google Maps API
+        3. Predictions that account for quadratic year trends and CO2 emissions
+
         For Goleta specifically:
-        - Located near Santa Barbara, California
-        - Average elevation is about 13 meters above sea level
-        - Contains important areas like UCSB and Goleta Beach
-        
-        Please provide accurate, informative responses about sea level rise, climate change, and our prediction methodology.
-        Keep responses concise and user-friendly. If asked about specific locations like Goleta, use the elevation data mentioned above.
-        
-        Always respond in a helpful and informative way, providing specific details when possible."""
+        - Located near Santa Barbara, CA
+        - Average elevation: 13 meters
+        - Contains UCSB and Goleta Beach
+        - Vulnerable to sea level rise due to coastal location
 
-        # Create the chat completion with the official format
-        response = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ],
-            model="mixtral-8x7b-32768",
-            temperature=0.7,
-            max_tokens=800,
-            top_p=1,
-            stream=False
-        )
+        Provide clear, accurate information about sea level rise predictions and climate change impacts.
+        Keep responses concise and focused."""
 
-        # Extract the response text
-        if hasattr(response, 'choices') and len(response.choices) > 0:
-            assistant_message = response.choices[0].message.content
-            if assistant_message:
-                return jsonify({"response": assistant_message})
+        try:
+            # Try the versatile model first
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ],
+                model="llama2-70b-4096",  # Using LLaMA2 70B model
+                temperature=0.7,
+                max_tokens=1024,
+                top_p=1
+            )
             
-        return jsonify({"error": "No response generated"}), 500
+            if not chat_completion or not hasattr(chat_completion, 'choices'):
+                raise Exception("Invalid response structure")
+            
+            response_content = chat_completion.choices[0].message.content
+            if not response_content:
+                raise Exception("Empty response received")
+            
+            return jsonify({"response": response_content})
+            
+        except Exception as model_error:
+            print(f"Primary model error: {str(model_error)}")
+            try:
+                # Fallback to mixtral model
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": message
+                        }
+                    ],
+                    model="mixtral-8x7b-32768",  # Fallback to Mixtral model
+                    temperature=0.7,
+                    max_tokens=1024,
+                    top_p=1
+                )
+                
+                if not chat_completion or not hasattr(chat_completion, 'choices'):
+                    raise Exception("Invalid response structure from fallback model")
+                
+                response_content = chat_completion.choices[0].message.content
+                if not response_content:
+                    raise Exception("Empty response from fallback model")
+                
+                return jsonify({"response": response_content})
+                
+            except Exception as fallback_error:
+                print(f"Fallback model error: {str(fallback_error)}")
+                error_message = "AI models are currently unavailable. Please try again later."
+                if "rate" in str(fallback_error).lower():
+                    error_message = "The AI service is currently busy. Please wait a moment and try again."
+                return jsonify({"error": error_message}), 503
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return jsonify({"error": f"Failed to process message: {str(e)}"}), 500
+        error_message = "An error occurred while processing your message. Please try again."
+        status_code = 500
+        
+        if "api key" in str(e).lower():
+            error_message = "There's an issue with the AI service configuration. Please try again later."
+            status_code = 401
+        elif "rate" in str(e).lower():
+            error_message = "The AI service is currently busy. Please wait a moment and try again."
+            status_code = 429
+            
+        return jsonify({"error": error_message}), status_code
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

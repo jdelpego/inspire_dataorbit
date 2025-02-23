@@ -8,13 +8,16 @@
         
         <div class="chat-box" id="chat-box">
             <div class="message system-message">
-                Hello! I'm your Sea Level Rise Assistant. Feel free to ask me questions about sea level rise, our prediction model, or climate change in general.
+                Welcome! I'm your Sea Level Rise Assistant. I can help you understand sea level rise predictions, climate change impacts, information about Goleta and UCSB, and ways to combat climate change. What would you like to know?
             </div>
         </div>
 
         <div class="chat-input-container">
-            <input type="text" id="chat-input" placeholder="Type your question here..." class="chat-input">
-            <button id="send-button" class="predict-button">Send</button>
+            <textarea id="chat-input" placeholder="Type your question here... (Press Enter to send, Shift+Enter for new line)" class="chat-input" rows="1"></textarea>
+            <button id="send-button" class="predict-button">
+                <span id="button-text">Send</span>
+                <div id="loading-spinner" class="spinner" style="display: none;"></div>
+            </button>
         </div>
 
         <div class="button-container">
@@ -29,22 +32,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatBox = document.getElementById('chat-box');
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
+    const buttonText = document.getElementById('button-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    let isProcessing = false;
+    let retryCount = 0;
+    const MAX_RETRIES = 2;
 
-    function addMessage(text, isUser) {
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    function setLoading(isLoading) {
+        isProcessing = isLoading;
+        sendButton.disabled = isLoading;
+        buttonText.style.display = isLoading ? 'none' : 'inline';
+        loadingSpinner.style.display = isLoading ? 'inline-block' : 'none';
+        chatInput.disabled = isLoading;
+    }
+
+    function addMessage(text, type = 'assistant') {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}-message`;
+        
+        // Convert URLs to clickable links
+        const linkedText = text.replace(
+            /(https?:\/\/[^\s]+)/g, 
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        
+        messageDiv.innerHTML = linkedText;
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    async function sendMessage() {
+    async function sendMessage(retry = false) {
         const message = chatInput.value.trim();
-        if (!message) return;
+        if (!message || isProcessing) return;
 
-        // Add user message
-        addMessage(message, true);
-        chatInput.value = '';
+        if (!retry) {
+            setLoading(true);
+            addMessage(message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            retryCount = 0;
+        }
 
         try {
             const response = await fetch('/chat', {
@@ -55,20 +88,160 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ message: message })
             });
 
-            const data = await response.json();
-            addMessage(data.response, false);
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                throw new Error('Failed to parse server response');
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Server error');
+            }
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (!data.response || typeof data.response !== 'string') {
+                throw new Error('Invalid response format from server');
+            }
+
+            addMessage(data.response);
+
         } catch (error) {
             console.error('Error:', error);
-            addMessage('Sorry, I encountered an error. Please try again.', false);
+            
+            const errorMessage = error.message || 'Connection error. Please try again.';
+            
+            // Don't retry on certain errors
+            if (errorMessage.includes('configuration') || 
+                errorMessage.includes('Invalid response format') ||
+                errorMessage.includes('Failed to parse')) {
+                addMessage('🚫 ' + errorMessage, 'error');
+            } else if (retryCount < MAX_RETRIES) {
+                console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
+                retryCount++;
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+                return sendMessage(true);
+            } else {
+                addMessage('🚫 ' + errorMessage, 'error');
+            }
+        } finally {
+            if (!retry) {
+                setLoading(false);
+            }
         }
     }
 
-    sendButton.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
+    sendButton.addEventListener('click', () => sendMessage(false));
+    
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(false);
         }
     });
+
+    // Focus input on page load
+    chatInput.focus();
 });
 </script>
+
+<style>
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.predict-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.predict-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.chat-input {
+    resize: none;
+    overflow-y: hidden;
+    min-height: 40px;
+    max-height: 150px;
+    line-height: 1.5;
+    color: white;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.message {
+    color: white;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+    word-wrap: break-word;
+}
+
+.error-message {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff3b30;
+}
+
+.user-message {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    margin-left: auto;
+    text-align: right;
+    max-width: 80%;
+}
+
+.assistant-message {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-right: auto;
+    text-align: left;
+    max-width: 80%;
+}
+
+.message a {
+    color: #78b6ff;
+    text-decoration: underline;
+}
+
+.message a:hover {
+    color: #a8d1ff;
+}
+
+.system-message {
+    background: rgba(74, 144, 226, 0.1);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    text-align: center;
+    margin: 0 auto 1rem auto;
+    max-width: 100%;
+}
+
+.chat-box {
+    background: rgba(0, 0, 51, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+</style>
 {% endblock %} 
