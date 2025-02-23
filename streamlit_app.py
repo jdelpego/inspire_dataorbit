@@ -134,20 +134,6 @@ def get_groq_response(user_input):
         ]
     )
     return response.choices[0].message.content if response.choices else "No response."
-
-def recognize_speech():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("Listening... Speak now!")
-        recognizer.adjust_for_ambient_noise(source)
-        try:
-            audio = recognizer.listen(source, timeout=5)
-            text = recognizer.recognize_google(audio)
-            return text
-        except sr.UnknownValueError:
-            return "Could not understand audio."
-        except sr.RequestError:
-            return "Speech Recognition service error."
         
 def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
     """
@@ -474,13 +460,9 @@ elif tab == "resources":
 elif tab == "chatbot":
     st.title("Sea Level Rise Chatbot")
 
-    st.write("Ask about rising sea levels, its causes, and impacts!")
+    st.markup("<h3 style='text-align: center;'>Ask about rising sea levels, its causes, and impacts!</h3>", unsafe_allow_html=True)
 
     user_input = st.text_input("Enter your question about sea level rise:")
-
-    if st.button("Use Voice Input"):
-        user_input = recognize_speech()
-        st.text(f"You said: {user_input}")
 
     if st.button("Get Response"):
         if user_input:
@@ -490,4 +472,4 @@ elif tab == "chatbot":
             st.subheader("Chatbot's Response:")
             st.write(response)
         else:
-            st.warning("Please enter a question or use voice input.")
+            st.warning("Please enter a question.")

@@ -301,45 +301,52 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        # Initialize Groq client
-        client = groq.Groq(api_key=GROQ_API_KEY)
-        
+        print("Initializing Groq client...")
+        client = groq.Groq(api_key="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")
+
         try:
-            # Simple direct completion like in Streamlit version
-            completion = client.chat.completions.create(
+            print("Making API call to Groq...")
+            response = client.chat.completions.create(
                 model="mixtral-8x7b-32768",
                 messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful assistant specializing in sea level rise and climate change. Provide clear, accurate information about predictions and impacts."
+                    },
                     {
                         "role": "user",
                         "content": message
                     }
                 ],
                 temperature=0.7,
-                max_tokens=800,
+                max_tokens=1024,
                 top_p=1,
                 stream=False
             )
             
-            if not completion.choices or not completion.choices[0].message.content:
-                print("Received empty response from Groq API")
-                raise Exception("Empty response from Groq API")
+            if not response.choices:
+                print("No choices in response")
+                return jsonify({"error": "No response from AI service"}), 500
                 
-            response_text = completion.choices[0].message.content.strip()
-            print("Successfully received response from Groq")
+            response_text = response.choices[0].message.content
+            if not response_text:
+                print("Empty response text")
+                return jsonify({"error": "Empty response from AI service"}), 500
+                
+            print("Successfully received response")
             return jsonify({"response": response_text})
             
         except Exception as api_error:
-            print(f"Groq API error: {str(api_error)}")
-            if "rate" in str(api_error).lower():
-                return jsonify({"error": "The AI service is currently busy. Please wait a moment and try again."}), 429
-            elif "authentication" in str(api_error).lower():
-                return jsonify({"error": "Authentication error with AI service. Please check API key."}), 401
-            else:
-                return jsonify({"error": "Failed to get response from AI service. Please try again."}), 503
+            print(f"API Error: {str(api_error)}")
+            return jsonify({
+                "error": "The AI service is temporarily unavailable. Please try again in a moment."
+            }), 503
 
     except Exception as e:
-        print(f"Chat error: {str(e)}")
-        return jsonify({"error": "An error occurred while processing your message. Please try again."}), 500
+        print(f"General Error: {str(e)}")
+        return jsonify({
+            "error": "An error occurred while processing your message. Please try again."
+        }), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
