@@ -301,49 +301,19 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        print("Initializing Groq client...")
-        client = groq.Groq(api_key="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")
-
-        try:
-            print("Making API call to Groq...")
-            response = client.chat.completions.create(
-                model="mixtral-8x7b-32768",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant specializing in sea level rise and climate change. Provide clear, accurate information about predictions and impacts."
-                    },
-                    {
-                        "role": "user",
-                        "content": message
-                    }
-                ],
-                temperature=0.7,
-                max_tokens=1024,
-                top_p=1,
-                stream=False
-            )
-            
-            if not response.choices:
-                print("No choices in response")
-                return jsonify({"error": "No response from AI service"}), 500
-                
-            response_text = response.choices[0].message.content
-            if not response_text:
-                print("Empty response text")
-                return jsonify({"error": "Empty response from AI service"}), 500
-                
-            print("Successfully received response")
-            return jsonify({"response": response_text})
-            
-        except Exception as api_error:
-            print(f"API Error: {str(api_error)}")
-            return jsonify({
-                "error": "The AI service is temporarily unavailable. Please try again in a moment."
-            }), 503
+        print("Making API call to Groq...")
+        client = groq.Groq(api_key=GROQ_API_KEY)
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-32768",
+            messages=[{"role": "user", "content": message}]
+        )
+        
+        response_text = response.choices[0].message.content if response.choices else "No response."
+        print("Successfully received response")
+        return jsonify({"response": response_text})
 
     except Exception as e:
-        print(f"General Error: {str(e)}")
+        print(f"Error: {str(e)}")
         return jsonify({
             "error": "An error occurred while processing your message. Please try again."
         }), 500
