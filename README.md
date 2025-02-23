@@ -1,58 +1,67 @@
-Flood Prediction App
-A Streamlit-based web application to predict the flooding year and time remaining until submersion for a given location. The app takes latitude, longitude, elevation, and relevant flooding data to provide predictions based on the provided parameters.
+🌊 Sea Level Rise Prediction App
 
-Features
-Location Details: Displays latitude, longitude, and sea level information.
-Flood Prediction: Shows the submersion year and the estimated time remaining until the flooding occurs.
-Interactive Map: (Optional) View and explore the location's flooding prediction on a map.
-Customizable Inputs: Enter location data via URL query parameters to dynamically update predictions.
-Disclaimer: Notifications to inform users that predictions can vary based on external factors not measured in the model.
-Installation
-To run the app locally, clone the repository and install the necessary dependencies:
-bash
-Copy
-Edit
-git clone https://github.com/yourusername/flood-prediction-app.git
-cd flood-prediction-app
-pip install -r requirements.txt
-Requirements
+📌 Overview
+
+This web application predicts when a location will be affected by rising sea levels. Using historical sea level data, CO2 emissions, and elevation information, the model estimates when a specific point on the map will be submerged due to climate change.
+
+🚀 Features
+
+Interactive Map: Click on any land location to retrieve elevation data. Sea Level Prediction Model: Estimates the year when a location will be affected by rising sea levels. Google Maps Elevation API Integration: Fetches real-time elevation data. Data Visualization: Displays sea level rise. Educational Resources: Provides information on mitigating climate change.
+
+📊 How It Works
+
+User clicks on a location on the interactive map. Elevation is retrieved using the Google Maps Elevation API. Sea level rise prediction model estimates the flooding year based on CO2 emissions and historical sea level data. Results are displayed, including: Latitude & Longitude, Elevation (meters), Predicted year of flooding, Years until flooding
+
+🛠️ Technologies Used
+
+Python (Streamlit, Pandas, NumPy, Scikit-learn), Folium (for interactive maps), Google Maps Elevation API (to get real-world elevation data), SingleStoreDB (for data storage), Machine Learning (Polynomial Regression for predictions)
+
+🔧 Setup & Installation
+
+Prerequisites
+
 Python 3.x
-Streamlit
-Other Python dependencies (refer to requirements.txt)
 
-2. Input Parameters
-The app retrieves the following query parameters via the URL:
+pip (Python package manager)
 
-lat: Latitude of the location (e.g., lat=40.7128).
-lon: Longitude of the location (e.g., lon=-74.0060).
-elevation: Sea level in meters (e.g., elevation=10.5).
-flooding_year: Predicted flooding year (e.g., flooding_year=2050).
-years_until: Years remaining until flooding occurs (e.g., years_until=25).
+Installation Steps
 
-3. Viewing Predictions
-The app will display the coordinates, sea level, submersion year, and time remaining based on the provided parameters.
-A visual disclaimer is included to remind users that predictions may vary.
+Clone this repository:
 
-Disclaimer
-Predictions made by this model are based on limited data and assumptions. External factors not included in the model may affect predictions. Use the predictions as estimates and for informational purposes only.
+git clone https://github.com/yourusername/sea-level-predictor.git
+cd sea-level-predictor
 
-## 👥 Team Members
+Install dependencies:
 
-- **Joaquin Del Pego**
-- **Ivy Holiday**
-- **Samprita Chakraborty**
-- **Calvin Lu**
-- **Luke Herbelin**
+pip install -r requirements.txt
 
-## 📝 License
+Add your Google Maps API Key to secrets.toml:
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[api_key]
+google_maps_api_key = "YOUR_API_KEY"
 
-## 🙏 Acknowledgments
+Run the application:
 
-_Acknowledgments will be added upon project completion_
+streamlit run app.py
 
----
-<div align="center">
-Made with ❤️ for the NFL Data Analysis Datathon 2024
-</div>
+📖 Data Sources: NOAA Sea Level Data, Global CO2 Emissions Data, Google Maps Elevation API
+
+📌 Future Improvements
+
+🌍 Enhance accuracy by incorporating temperature trends.
+
+📡 Add real-time climate change projections.
+
+📊 Improve visualization of predicted sea level rise.
+
+🤝 Contributing
+
+Contributions are welcome! Feel free to submit a pull request or open an issue.
+
+📜 License
+
+This project is licensed under the MIT License.
+
+🌱 Join us in spreading awareness about climate change and rising sea levels! 🌎
+
+
