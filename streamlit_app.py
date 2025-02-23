@@ -90,7 +90,7 @@ if tab == "Home":
 
     m = create_map(lat, lon)
 
-    map_result = st_folium(m, width=500, height=300)  
+    map_result = st_folium(m, width="100%", height=500)  
 
     st.markdown('</div>', unsafe_allow_html=True)
 
