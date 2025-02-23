@@ -1,17 +1,17 @@
 import streamlit as st
 import urllib.parse
 
+# Retrieve query parameters and convert to float (handle empty values safely)
 query_params = st.query_params
-lat = query_params.get("lat", [""])[0]
-lon = query_params.get("lon", [""])[0]
-elevation = query_params.get("elevation", [""])[0]
-flooding_year = query_params.get("flooding_year", [""])[0]
-years_until = query_params.get("years_until", [""])[0] 
+lat = float(query_params.get("lat", ["0"])[0]) if query_params.get("lat", [""])[0] else 0.0
+lon = float(query_params.get("lon", ["0"])[0]) if query_params.get("lon", [""])[0] else 0.0
+elevation = float(query_params.get("elevation", ["0"])[0]) if query_params.get("elevation", [""])[0] else 0.0
+flooding_year = float(query_params.get("flooding_year", ["0"])[0]) if query_params.get("flooding_year", [""])[0] else 0.0
+years_until = float(query_params.get("years_until", ["0"])[0]) if query_params.get("years_until", [""])[0] else 0.0
 
 st.markdown(
     """
     <style>
-        /* Set the whole page background to light blue */
         [data-testid="stAppViewContainer"] {
             background-color: #8AD4EB !important;
         }
@@ -44,10 +44,6 @@ st.markdown(
             padding: 10px 20px;
             border-radius: 5px;
             display: inline-block;
-        }
-        .icon {
-            width: 50px;
-            height: 50px;
         }
         .info-box {
             background-color: #B3E5FC;
@@ -84,22 +80,26 @@ col1, col2 = st.columns([1, 3])
 with col1:
     st.image("city.jpg", width=200)
 with col2:
-    st.markdown(f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: Latitude: {lat:.4f}, Longitude: {lon:.4f}</span></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sea-level">Sea Level: {elevation:.4f} m</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: Latitude: {lat:.4f}, Longitude: {lon:.4f}</span></div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(f'<div class="sea-level">Sea Level: {elevation:.2f} m</div>', unsafe_allow_html=True)
 
 # Info box with Time to Sink and Time Remaining in columns
 with st.container():
     st.markdown('<div class="info-box">', unsafe_allow_html=True)
-    
+
     # Creating two columns inside the box for side-by-side layout
     info_col1, info_col2 = st.columns([1, 1])
-    
+
     with info_col1:
         st.markdown('<div class="info-item">Submersion Year</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="info-value">{flooding_year:.1f}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="info-value">{flooding_year:.0f}</div>', unsafe_allow_html=True)
     with info_col2:
         st.markdown('<div class="info-item">Time Remaining</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="info-value">{years_until:.1f} years</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="info-value">{years_until:.0f} years</div>', unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
