@@ -76,6 +76,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.error || 'Failed to get response');
             }
 
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
             addMessage(data.response);
 
         } catch (error) {
@@ -125,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 15px;
     overflow-y: auto;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
 .chat-input-container {
@@ -143,6 +148,12 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1rem;
     resize: none;
     min-height: 40px;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: rgba(74, 144, 226, 0.5);
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.2);
 }
 
 .predict-button {
@@ -178,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     max-width: 80%;
     word-wrap: break-word;
     color: white;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .system-message {
@@ -220,6 +232,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
 {% endblock %} 
