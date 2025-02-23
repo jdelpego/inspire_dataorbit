@@ -8,6 +8,10 @@ from sklearn.linear_model import LinearRegression
 from dotenv import load_dotenv
 from singlestoredb import connect, DatabaseError
 import sys
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.resources import INLINE
+from bokeh.models import ColumnDataSource, HoverTool
 
 # Load environment variables
 load_dotenv()
@@ -188,6 +192,76 @@ def predict():
 @app.route('/resources')
 def resources():
     return render_template('resources.html')
+
+@app.route('/chart')
+def chart():
+    try:
+        # Read the CSV file
+        df = pd.read_csv('seaData.csv')
+        
+        # Convert 'Time' to datetime and extract the year
+        df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
+        df['Year'] = df['Time'].dt.year
+        
+        # Ensure 'GMSL' is numeric
+        df['GMSL'] = pd.to_numeric(df['GMSL'], errors='coerce')
+        
+        # Drop rows with missing values
+        df = df.dropna(subset=['Year', 'GMSL'])
+        
+        # Create Bokeh figure with a dark theme
+        p = figure(
+            title="Global Mean Sea Level Rise",
+            x_axis_label='Year',
+            y_axis_label='Sea Level (mm)',
+            height=500,
+            width=800,
+            background_fill_color='#1a1a1a',
+            border_fill_color='transparent',
+            outline_line_color='#333333'
+        )
+        
+        # Style the plot
+        p.title.text_color = 'white'
+        p.title.text_font_size = '16px'
+        p.xaxis.axis_label_text_color = 'white'
+        p.yaxis.axis_label_text_color = 'white'
+        p.xaxis.major_label_text_color = 'white'
+        p.yaxis.major_label_text_color = 'white'
+        p.grid.grid_line_color = '#333333'
+        
+        # Create a ColumnDataSource
+        source = ColumnDataSource(df)
+        
+        # Add the line to the figure
+        p.line('Year', 'GMSL', source=source, line_width=2, color="#4a90e2")
+        
+        # Add hover tool
+        hover = HoverTool(
+            tooltips=[
+                ('Year', '@Year'),
+                ('Sea Level', '@GMSL{0.0} mm')
+            ]
+        )
+        p.add_tools(hover)
+        
+        # Get the components
+        script, div = components(p)
+        
+        # Include Bokeh resources
+        js_resources = INLINE.render_js()
+        css_resources = INLINE.render_css()
+        
+        return render_template(
+            'chart.html',
+            chart_html=div + script,
+            js_resources=js_resources,
+            css_resources=css_resources
+        )
+        
+    except Exception as e:
+        print(f"Error generating chart: {str(e)}")
+        return redirect('/')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
