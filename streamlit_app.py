@@ -104,22 +104,37 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     """
     # Extend prediction range if needed
     years_needed = np.arange(start_year + 1, start_year + max_years + 1)
-
-    nweights =  future_X['year'] - np.min(future_X['year']) + 1
+    
+    # Apply weight adjustment based on year distance
+    nweights = future_X['year'] - np.min(future_X['year']) + 1
      
-    # Project CO2 emissions using exponential model
+    # Exponential CO2 emissions model
     log_emissions = np.log(future_X['Emissions'])
     exp_model = np.polyfit(future_X['year'], log_emissions, 1, w=nweights)
     future_emissions = np.exp(np.polyval(exp_model, years_needed))
-    
-    # Create extended prediction data
-    extended_X = pd.DataFrame({
-        'year': years_needed,
-        'Emissions': future_emissions
-    })
 
-    # Make predictions
-    future_levels = model.predict(poly.transform(extended_X)) * 1.2
+    max_emissions = 2 * max(future_X["Emissions"])  # No more than double today's emissions
+    future_emissions = np.minimum(future_emissions, max_emissions)
+
+    
+    # Extended future dataset
+    extended_X = pd.DataFrame({'year': years_needed, 'Emissions': future_emissions})
+    
+    # **PREDICTION WITH CAP**
+    future_levels = model.predict(poly.transform(extended_X))
+
+    # ✅ **Limit sea level rise to a max possible value**
+    max_sea_level_by_2100 = base_sea_level + 2300  # 2.3m (2300mm) rise cap
+    max_sea_level_by_2200 = base_sea_level + 10000  # 10m (10,000mm) rise cap
+
+    for i, year in enumerate(years_needed):
+        if year <= 2100:
+            future_levels[i] = min(future_levels[i], max_sea_level_by_2100)
+        elif year <= 2200:
+            future_levels[i] = min(future_levels[i], max_sea_level_by_2200)
+        else:
+            future_levels[i] = min(future_levels[i], max_sea_level_by_2200 + (year - 2200) * 2)  # Slower rise after 2200
+
     
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
