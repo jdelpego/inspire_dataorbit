@@ -295,7 +295,7 @@ if tab == "Home" or tab == None:
         .predict-button {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 2px;
         }
         .predict-button a {
             background-color: #007BFF;
