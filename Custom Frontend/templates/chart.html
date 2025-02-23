@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="details-page">
+    <div class="details-container chart-container">
+        <h2 class="title">Sea Level Rise Chart</h2>
+        <p class="subtitle">Historical and projected sea level rise data visualization</p>
+        
+        <div class="chart-wrapper">
+            {{ chart_html | safe }}
+        </div>
+
+        <div class="chart-description">
+            <h3>Understanding the Data</h3>
+            <p>This chart shows the global mean sea level (GMSL) changes over time. The blue line represents historical measurements, while the interactive features allow you to explore specific data points.</p>
+        </div>
+
+        <a href="/" class="back-button">Back to Map</a>
+    </div>
+</div>
+{% endblock %} 

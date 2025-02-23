@@ -337,3 +337,59 @@ body {
     margin-bottom: 2rem;
     text-align: center;
 }
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 0 30px rgba(0, 153, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-wrapper {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.chart-description {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.chart-description h3 {
+    color: #ffffff;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    text-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
+}
+
+.chart-description p {
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+/* Bokeh chart customization */
+.bk-root {
+    background: transparent !important;
+}
+
+.bk-plot-layout {
+    background: transparent !important;
+}
+
+.bk-tool-box {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+}
