@@ -228,7 +228,7 @@ tab = query_params.get("page", ["Home"])[0]
 if tab == "Home":
     st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
-        <h1 style='text-align: center; color: #333;'>🌊 Sea Level Predictor</h1>
+        <h1 style='text-align: center; color: #60a7f7;'>🌊 Sea Level Predictor</h1>
         <p style='text-align: center;'>Prediction Model</p>
     """, unsafe_allow_html=True)
 
