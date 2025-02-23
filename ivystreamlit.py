@@ -66,6 +66,13 @@ st.markdown(
             font-weight: bold;
             text-align: center;
         }
+        .disclaimer {
+            font-size: 14px;
+            color: #333;
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -103,3 +110,6 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+# Disclaimer
+st.markdown('<div class="disclaimer">Predictions can vary based on external factors not measured in our model.</div>', unsafe_allow_html=True)
