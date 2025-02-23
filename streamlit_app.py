@@ -212,14 +212,11 @@ if tab == "Home":
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             lat = clicked_location["lat"]
             lon = clicked_location["lng"]
+            elevation = get_elevation(lat, lon)
+            flooding_year, years_until = predict_flooding_year(
+                elevation*100, model, X, current_sea_level, current_year
+            )
 
-    elevation = get_elevation(lat, lon)
-    
-    
-    flooding_year, years_until = predict_flooding_year(
-        elevation*100, model, X, current_sea_level, current_year
-    )
-    
     st.markdown(f"""
     <div style="text-align: center; font-size: 18px;">
         <p><strong>📍Latitude:</strong> {lat}</p>
