@@ -186,7 +186,7 @@ def get_elevation(lat, lon):
         if result["status"] == "OK":
             return result["results"][0]["elevation"]
         else:
-            print(f"ERROR: {response['status']}")
+            print(f"ERROR: {result["status"]}")
     else:
         print(f"ERROR: {response.status_code}")
         return None
