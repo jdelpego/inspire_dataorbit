@@ -315,7 +315,6 @@ if tab == "Home" or tab == None:
         </div>
     """, unsafe_allow_html=True)
     st.markdown('<div class="content">', unsafe_allow_html=True)
-    st.write(f"DEBUG: Current tab is {tab}")
 elif tab == "resources":
     st.title("Help Mitigate Rising Sea Levels!")
     # Display information using markdown and HTML
