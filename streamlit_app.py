@@ -20,10 +20,8 @@ from jinja2 import Template
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
 from sklearn.linear_model import Ridge
-
-google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
-groqapi_key = st.secrets["api_key"]["groqapi_key"]
-openai_key = st.secrets["api_key"]["openai_key"]
+from dotenv import load_dotenv
+import groq
 
 st.markdown("""
     <style>
@@ -106,32 +104,48 @@ class ClearMarkerOnClick(MacroElement):
         {% endmacro %}
     """)
 
-def record_audio():
+load_dotenv()
+
+google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
+groqapi_key = os.getenv("groqapi_key")
+groq_client = groq.Groq(api_key=groqapi_key)
+
+def recognize_speech():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
-        audio = recognizer.listen(source)
-    try:
-        text = recognizer.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        return "Sorry, I couldn't understand that."
-    except sr.RequestError:
-        return "Could not request results, please check your internet connection."
-    
-def transcribe_audio(file_path):
-    with open(file_path, "rb") as audio_file:
-        response = openai.Audio.transcribe("whisper-1", audio_file, api_key=openai_api_key)
-        return response["text"]
+        st.info("Listening... Speak now!")
+        recognizer.adjust_for_ambient_noise(source)
+        try:
+            audio = recognizer.listen(source, timeout=5)
+            text = recognizer.recognize_google(audio)
+            return text
+        except sr.UnknownValueError:
+            return "Could not understand audio."
+        except sr.RequestError:
+            return "Speech Recognition service error."
 
 # Function to get chatbot response from Groq API
 def get_groq_response(user_input):
-    url = "https://api.groq.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
-    data = {"model": "mixtral-8x7b-32768", "messages": [{"role": "user", "content": user_input}]}
-    response = requests.post(url, json=data, headers=headers)
-    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response.")
+    response = groq_client.chat.completions.create(
+        model="mixtral-8x7b-32768",
+        messages=[{"role": "user", "content": user_input}]
+    )
+    return response.choices[0].message.content if response.choices else "No response."
 
+def recognize_speech():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.info("Listening... Speak now!")
+        recognizer.adjust_for_ambient_noise(source)
+        try:
+            audio = recognizer.listen(source, timeout=5)
+            text = recognizer.recognize_google(audio)
+            return text
+        except sr.UnknownValueError:
+            return "Could not understand audio."
+        except sr.RequestError:
+            return "Speech Recognition service error."
+        
 def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
     """
     Predict the year when a specific altitude will be flooded.
@@ -455,33 +469,22 @@ elif tab == "resources":
     )
 
 elif tab == "chatbot":
-    st.title("🗣️ Groq Multimodal Chatbot")
+    st.title("Sea Level Rise Chatbot")
 
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = []
+    st.write("Ask about rising sea levels, its causes, and impacts!")
 
+    user_input = st.text_input("Enter your question about sea level rise:")
 
-    for message in st.session_state["messages"]:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
+    if st.button("Use Voice Input"):
+        user_input = recognize_speech()
+        st.text(f"You said: {user_input}")
 
-    user_input = st.text_input("Type your message or use voice input:", key="user_input")
-
-    if st.button("🎤 Speak"):
-        audio_file = record_audio()
-        transcribed_text = transcribe_audio(audio_file)
-        os.remove(audio_file) 
-        st.text(f"You said: {transcribed_text}")
-        user_input = transcribed_text  
-
-
-    if user_input:
-
-        st.session_state["messages"].append({"role": "user", "content": user_input})
-        
-
-        response = get_groq_response(user_input)
-        st.session_state["messages"].append({"role": "assistant", "content": response})
-        
-        with st.chat_message("assistant"):
+    if st.button("Get Response"):
+        if user_input:
+            with st.spinner("Fetching response..."):
+                response = get_groq_response(user_input)
+            
+            st.subheader("Chatbot's Response:")
             st.write(response)
+        else:
+            st.warning("Please enter a question or use voice input.")
