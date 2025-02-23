@@ -76,8 +76,8 @@ st.markdown("""
 
 st.markdown("""
     <div class="navbar">
-        <a href="?page=Home">🏠 Home</a>
-        <a href="?page=resources">📚 Resources</a>
+        <a target="_self" href="?page=Home">🏠 Home</a>
+        <a target="_self" href="?page=resources">📚 Resources</a>
     </div>
 """, unsafe_allow_html=True)
 
@@ -223,9 +223,9 @@ def create_map(lat, lon, zoom=5):
 
 # Get current page
 query_params = st.query_params
-tab = query_params.get("page", ["Home"])[0]
+tab = query_params.get("page")
 
-if tab == "Home":
+if tab == "Home" or tab == None:
     st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
         <h1 style='text-align: center; color: #60a7f7;'>🌊 Sea Level Predictor</h1>
