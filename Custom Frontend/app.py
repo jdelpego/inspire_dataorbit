@@ -301,60 +301,53 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        # Initialize Groq client with API key
-        client = groq.Groq(
-            api_key="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"
-        )
+        # Initialize Groq client with API key from .env
+        client = groq.Groq(api_key=GROQ_API_KEY)
         
-        # Create system prompt with context about the project
-        system_prompt = """You are a helpful AI assistant for a sea level rise prediction project. 
-        The project uses machine learning (Ridge regression) to predict when locations will be affected by sea level rise.
-        Key features:
-        - Uses historical sea level data and CO2 emissions
-        - Predicts flooding years based on elevation
-        - Includes a 2.5x multiplier for conservative estimates
-        - Uses Google Maps API for elevation data
-        
-        For Goleta specifically:
-        - Located near Santa Barbara, California
-        - Average elevation is about 13 meters above sea level
-        - Contains important areas like UCSB and Goleta Beach
-        
-        Please provide accurate, informative responses about sea level rise, climate change, and our prediction methodology.
-        Keep responses concise and user-friendly. If asked about specific locations like Goleta, use the elevation data mentioned above.
-        
-        Always respond in a helpful and informative way, providing specific details when possible."""
+        # Create messages array with user's question and context
+        messages = [
+            {
+                "role": "system",
+                "content": """I am a helpful AI assistant for a sea level rise prediction project. 
+                Our project uses Ridge regression to predict flooding timelines based on elevation and CO2 emissions.
+                
+                Key project features:
+                - Uses historical sea level data since 1880
+                - Considers CO2 emissions impact
+                - Uses 2.5x multiplier for conservative estimates
+                - Integrates with Google Maps for elevation data
+                
+                For Goleta area:
+                - Located in Santa Barbara, California
+                - Average elevation: 13 meters above sea level
+                - Key locations: UCSB campus, Goleta Beach
+                - Coastal community vulnerable to sea level rise
+                
+                I provide specific details about sea level rise predictions, climate change impacts, and our methodology."""
+            },
+            {
+                "role": "user",
+                "content": message
+            }
+        ]
 
-        # Create the chat completion with the official format
+        # Make API call with simplified parameters
         response = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ],
+            messages=messages,
             model="mixtral-8x7b-32768",
             temperature=0.7,
-            max_tokens=800,
-            top_p=1,
-            stream=False
+            max_tokens=1000
         )
-
-        # Extract the response text
-        if hasattr(response, 'choices') and len(response.choices) > 0:
-            assistant_message = response.choices[0].message.content
-            if assistant_message:
-                return jsonify({"response": assistant_message})
-            
+        
+        # Extract and return response
+        if response and response.choices:
+            return jsonify({"response": response.choices[0].message.content})
+        
         return jsonify({"error": "No response generated"}), 500
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return jsonify({"error": f"Failed to process message: {str(e)}"}), 500
+        return jsonify({"error": "Failed to process message. Please try again."}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
