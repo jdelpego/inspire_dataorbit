@@ -267,7 +267,7 @@ if tab == "Home" or tab == None:
     
     # Ensure values are valid before sending them to the next page
     if flooding_year and years_until:
-        predict_url = f"https://inspiredataorbit-pskuarfzyis9iwg26brttt.streamlit.app?lat={lat}&lon={lon}&elevation={elevation:.2f}&flood_year={flooding_year}&years_until={years_until}"
+        predict_url = f"https://inspiredataorbit-pskuarfzyis9iwg26brttt.streamlit.app?lat={lat}&lon={lon}&elevation={elevation:.2f}&flooding_year={flooding_year}&years_until={years_until}"
     else:
         predict_url = None
 

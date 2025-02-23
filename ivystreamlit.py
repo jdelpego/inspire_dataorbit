@@ -5,7 +5,7 @@ query_params = st.query_params
 lat = query_params.get("lat", [""])[0]
 lon = query_params.get("lon", [""])[0]
 elevation = query_params.get("elevation", [""])[0]
-flood_year = query_params.get("flood_year", [""])[0]
+flooding_year = query_params.get("flooding_year", [""])[0]
 years_until = query_params.get("years_until", [""])[0] 
 
 st.markdown(
@@ -84,8 +84,8 @@ col1, col2 = st.columns([1, 3])
 with col1:
     st.image("city.jpg", width=200)
 with col2:
-    st.markdown(f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: Latitude: {lat}, Longitude: {lon}</span></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sea-level">Sea Level: {elevation} m</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: Latitude: {lat:.4f}, Longitude: {lon:.4f}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sea-level">Sea Level: {elevation:.4f} m</div>', unsafe_allow_html=True)
 
 # Info box with Time to Sink and Time Remaining in columns
 with st.container():
@@ -96,11 +96,10 @@ with st.container():
     
     with info_col1:
         st.markdown('<div class="info-item">Submersion Year</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="info-value">{flood_year}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="info-value">{flooding_year:.1f}</div>', unsafe_allow_html=True)
     with info_col2:
         st.markdown('<div class="info-item">Time Remaining</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="info-value">{years_until}</div>', unsafe_allow_html=True)
-
+        st.markdown(f'<div class="info-value">{years_until:.1f} years</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
