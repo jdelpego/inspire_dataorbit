@@ -1,7 +1,7 @@
 import streamlit as st
 import openai
 import os
-import speech_recognition as sr
+import speech_recognition as sr 
 import wavio
 import tempfile
 import folium
