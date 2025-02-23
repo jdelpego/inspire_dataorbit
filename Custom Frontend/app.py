@@ -302,20 +302,42 @@ def chat_message():
             return jsonify({"error": "No message provided"}), 400
 
         print("Making API call to Groq...")
-        client = groq.Groq(api_key=GROQ_API_KEY)
+        client = groq.Groq(
+            api_key=GROQ_API_KEY,
+            base_url="https://api.groq.com/v1"
+        )
         response = client.chat.completions.create(
             model="mixtral-8x7b-32768",
-            messages=[{"role": "user", "content": message}]
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant specializing in sea level rise and climate change."
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ],
+            temperature=0.7,
+            max_tokens=1024
         )
         
-        response_text = response.choices[0].message.content if response.choices else "No response."
+        if not response.choices:
+            print("No choices in response")
+            return jsonify({"error": "No response from AI service"}), 500
+            
+        response_text = response.choices[0].message.content
+        if not response_text:
+            print("Empty response text")
+            return jsonify({"error": "Empty response from AI service"}), 500
+            
         print("Successfully received response")
         return jsonify({"response": response_text})
 
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({
-            "error": "An error occurred while processing your message. Please try again."
+            "error": f"An error occurred: {str(e)}"
         }), 500
 
 if __name__ == '__main__':

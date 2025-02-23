@@ -1,8 +1,6 @@
 import streamlit as st
 import openai
 import os
-import speech_recognition as sr 
-import wavio
 import tempfile
 import folium
 import requests
@@ -109,20 +107,6 @@ load_dotenv()
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 groqapi_key = st.secrets["api_key"]["groqapi_key"]
 groq_client = groq.Groq(api_key=groqapi_key)
-
-def recognize_speech():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("Listening... Speak now!")
-        recognizer.adjust_for_ambient_noise(source)
-        try:
-            audio = recognizer.listen(source, timeout=5)
-            text = recognizer.recognize_google(audio)
-            return text
-        except sr.UnknownValueError:
-            return "Could not understand audio."
-        except sr.RequestError:
-            return "Speech Recognition service error."
 
 # Function to get chatbot response from Groq API
 def get_groq_response(user_input):
@@ -460,7 +444,7 @@ elif tab == "resources":
 elif tab == "chatbot":
     st.title("Sea Level Rise Chatbot")
 
-    st.markup("<h3 style='text-align: center;'>Ask about rising sea levels, its causes, and impacts!</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Ask about rising sea levels, its causes, and impacts!</h3>", unsafe_allow_html=True)
 
     user_input = st.text_input("Enter your question about sea level rise:")
 
