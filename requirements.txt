@@ -79,4 +79,4 @@ yarl==1.18.3
 requests
 singlestoredb
 scikit-learn
-bokeh==3.6.3
+bokeh==2.4.3
