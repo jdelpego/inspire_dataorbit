@@ -274,15 +274,15 @@ if tab == "Home" or tab == None:
             #m = create_map(lat, lon)
             #map_result = st_folium(m, width="100%", height=500)
 
-    st.markdown(f"""
-    <div style="text-align: center; font-size: 18px;" {'hidden' if not (lat and lon and elevation) else ''}>
-        <p><strong>📍Latitude:</strong> {'N/A' if not lat else lat}</p>
-        <p><strong>📍Longitude:</strong> {'N/A' if not lon else lon}</p>
-        <p><strong>📏Altitude:</strong> {'N/A' if not elevation else (f'{elevation:.2f} meters')}</p>
-        <p><strong> flooding year:</strong> {'N/A' if not flooding_year else flooding_year}</p>
-        <p><strong> years until:</strong> {'N/A' if not years_until else years_until}</p>
-    </div>
-""", unsafe_allow_html=True)
+   # st.markdown(f"""
+  #  <div style="text-align: center; font-size: 18px;" {'hidden' if not (lat and lon and elevation) else ''}>
+  #      <p><strong>📍Latitude:</strong> {'N/A' if not lat else lat}</p>
+  #      <p><strong>📍Longitude:</strong> {'N/A' if not lon else lon}</p>
+  #      <p><strong>📏Altitude:</strong> {'N/A' if not elevation else (f'{elevation:.2f} meters')}</p>
+  #      <p><strong> flooding year:</strong> {'N/A' if not flooding_year else flooding_year}</p>
+   #     <p><strong> years until:</strong> {'N/A' if not years_until else years_until}</p>
+    #</div>
+#""", unsafe_allow_html=True)
 
     # Ensure values are valid before sending them to the next page
     if flooding_year and years_until:
