@@ -91,7 +91,7 @@ with col2:
         f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: < {lat:.4f}, {lon:.4f} ></span></div>',
         unsafe_allow_html=True
     )
-    st.markdown(f'<div class="sea-level">Sea Level: {elevation:.2f} m</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sea-level">Sea Level: {elevation:.2f} meters</div>', unsafe_allow_html=True)
 
 # Info box with Time to Sink and Time Remaining in columns
 with st.container():
