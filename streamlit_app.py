@@ -74,7 +74,7 @@ def create_map(lat, lon, zoom=5):
     return m
 
 # Get current page
-query_params = st.query_params()
+query_params = st.query_params
 tab = query_params.get("page", ["Home"])[0]
 
 if tab == "Home":
