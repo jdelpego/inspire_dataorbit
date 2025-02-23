@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Level Rise Warning - San Diego</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background-color: #3B90FF;
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 2;
+            padding: 20px;
+            margin-top: 5vh;
+        }
+
+        .title {
+            font-size: 4.5rem;
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+
+        .years {
+            font-size: 6rem;
+            color: #CC0000;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .info {
+            position: absolute;
+            bottom: 25%;
+            left: 5%;
+            font-size: 3.5rem;
+            text-align: left;
+            z-index: 3;
+            line-height: 1.4;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            background-color: #1A3366;
+        }
+
+        .wave::before,
+        .wave::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            background-color: inherit;
+            clip-path: path('M0,100 C200,20 400,100 600,50 C800,0 1000,70 1200,40 V200 H0 V100Z');
+        }
+
+        .wave::before {
+            animation: wave1 12s linear infinite;
+            opacity: 1;
+        }
+
+        .wave::after {
+            animation: wave2 8s linear infinite;
+            opacity: 0.8;
+        }
+
+        .disclaimer {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 0.7rem;
+            color: #FF1111;
+            opacity: 0.8;
+        }
+
+        .credit {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: #FFD700;
+            color: black;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes wave1 {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes wave2 {
+            0% {
+                transform: translateX(-50%);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 3rem; }
+            .years { font-size: 4rem; }
+            .info { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">This Location Will Sink in</div>
+        <div class="years">5 YEARS!!!</div>
+    </div>
+    <div class="info">
+        Sea Level: +150ft<br>
+        Location: San Diego, CA<br>
+        Coordinates: -117.56, 33.33
+    </div>
+    <div class="wave"></div>
+    <div class="disclaimer">Sea levels are ±1 Year and predictions can vary based on external factors not measured in our model.</div>
+ 
