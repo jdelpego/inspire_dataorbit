@@ -252,6 +252,8 @@ if tab == "Home":
             flooding_year, years_until = predict_flooding_year(
                 elevation, model, X, current_sea_level, current_year
             )
+            m = create_map(lat, lon)
+            map_result = st_folium(m, width="100%", height=500)
 
     st.markdown(f"""
     <div style="text-align: center; font-size: 18px;">
