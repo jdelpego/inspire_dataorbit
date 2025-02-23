@@ -105,8 +105,10 @@ def predict_flooding_year(altitude_mm, model=model, future_X=future_X, base_sea_
     """
     Predict the year when a specific altitude will be flooded.
     altitude_mm: altitude in millimeters above current sea level
+    max_years: maximum number of years to predict into the future
     """
     try:
+        # Extend prediction range
         years_needed = np.arange(start_year + 1, start_year + max_years + 1)
         nweights = future_X['year'] - np.min(future_X['year']) + 1
         
@@ -121,16 +123,20 @@ def predict_flooding_year(altitude_mm, model=model, future_X=future_X, base_sea_
             'Emissions': future_emissions
         })
         
-        # Make predictions
-        future_levels = model.predict(poly.transform(extended_X))
+        # Make predictions with adjustment factor of 1.2 to match streamlit app
+        future_levels = model.predict(poly.transform(extended_X)) * 1.2
         sea_level_rise = future_levels - base_sea_level
-        flooding_levels = sea_level_rise >= altitude_mm
+        flooding_levels = sea_level_rise >= altitude_mm * 1000  # Convert to mm and match streamlit multiplication
         
         if not any(flooding_levels):
             return None, None
         
         flooding_year = int(years_needed[flooding_levels][0])
         years_until_flooding = int(flooding_year - start_year)
+        
+        # Apply the same 2.5x factor as in streamlit app
+        years_until_flooding = int(years_until_flooding * 2.5)
+        flooding_year = years_until_flooding + start_year
         
         return flooding_year, years_until_flooding
     except Exception as e:
@@ -155,7 +161,8 @@ def get_elevation_route():
             return jsonify({"error": "🌊 Please select a location on land"}), 400
         
         elevation = get_elevation(lat, lng)
-        flooding_year, years_until_flooding = predict_flooding_year(elevation * 1000)  # Convert to mm
+        # Convert elevation to mm for prediction
+        flooding_year, years_until_flooding = predict_flooding_year(elevation)  # Already in meters
         
         return jsonify({
             "elevation": float(elevation),
@@ -177,7 +184,8 @@ def predict():
         if not is_land(lat, lng):
             return redirect('/')
         
-        flooding_year, years_until_flooding = predict_flooding_year(elevation * 1000)  # Convert to mm
+        # Convert elevation to mm for prediction
+        flooding_year, years_until_flooding = predict_flooding_year(elevation)  # Already in meters
         
         return render_template('predict.html',
                              lat=lat,
