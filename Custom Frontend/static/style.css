@@ -7,7 +7,7 @@
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(135deg, #000033 0%, #0066cc 50%, #000033 100%);
+    background: linear-gradient(135deg, #0a1f4d 0%, #1e90ff 50%, #0a1f4d 100%);
     color: white;
     display: flex;
     justify-content: center;
@@ -176,15 +176,14 @@ body {
 }
 
 .details-container {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
-    padding: 2rem;
     border-radius: 20px;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    padding: 2rem;
+    max-width: 800px !important;
+    margin: 2rem auto;
     box-shadow: 0 0 30px rgba(0, 153, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
 }
 
 .coordinates-section {
@@ -440,7 +439,7 @@ body {
 }
 
 .chart-container {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 20px;
@@ -448,7 +447,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     box-shadow: 0 0 30px rgba(0, 153, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
 }
 
 .chart-wrapper {
