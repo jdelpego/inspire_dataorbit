@@ -444,7 +444,7 @@ elif tab == "resources":
 elif tab == "chatbot":
     st.title("Sea Level Rise Chatbot")
 
-    st.markup("<h3 style='text-align: center;'>Ask about rising sea levels, its causes, and impacts!</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Ask about rising sea levels, its causes, and impacts!</h3>", unsafe_allow_html=True)
 
     user_input = st.text_input("Enter your question about sea level rise:")
 
