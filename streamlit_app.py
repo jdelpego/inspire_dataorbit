@@ -216,21 +216,18 @@ if tab == "Home":
     map_result = st_folium(m, width="100%", height=500)  
 
     st.markdown('</div>', unsafe_allow_html=True)
-    
+    elevation = 0;
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
 
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             lat = clicked_location["lat"]
             lon = clicked_location["lng"]
+            elevation = get_elevation(lat, lon)
+            flooding_year, years_until = predict_flooding_year(
+                elevation*100, model, X, current_sea_level, current_year
+            )
 
-    elevation = get_elevation(lat, lon)
-    
-    
-    flooding_year, years_until = predict_flooding_year(
-        elevation*100, model, X, current_sea_level, current_year
-    )
-    
     st.markdown(f"""
     <div style="text-align: center; font-size: 18px;">
         <p><strong>📍Latitude:</strong> {lat}</p>
