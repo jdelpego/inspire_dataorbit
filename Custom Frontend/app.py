@@ -301,53 +301,30 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        # Initialize Groq client with API key from .env
         client = groq.Groq(api_key=GROQ_API_KEY)
         
-        # Create messages array with user's question and context
-        messages = [
-            {
-                "role": "system",
-                "content": """I am a helpful AI assistant for a sea level rise prediction project. 
-                Our project uses Ridge regression to predict flooding timelines based on elevation and CO2 emissions.
-                
-                Key project features:
-                - Uses historical sea level data since 1880
-                - Considers CO2 emissions impact
-                - Uses 2.5x multiplier for conservative estimates
-                - Integrates with Google Maps for elevation data
-                
-                For Goleta area:
-                - Located in Santa Barbara, California
-                - Average elevation: 13 meters above sea level
-                - Key locations: UCSB campus, Goleta Beach
-                - Coastal community vulnerable to sea level rise
-                
-                I provide specific details about sea level rise predictions, climate change impacts, and our methodology."""
-            },
-            {
-                "role": "user",
-                "content": message
-            }
-        ]
-
-        # Make API call with simplified parameters
-        response = client.chat.completions.create(
-            messages=messages,
+        completion = client.chat.completions.create(
             model="mixtral-8x7b-32768",
-            temperature=0.7,
-            max_tokens=1000
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that specializes in sea level rise and climate change. Focus on providing clear, accurate information about our prediction model that uses Ridge regression, historical data since 1880, and CO2 emissions to forecast flooding timelines. For Goleta specifically, note it's near Santa Barbara with an average elevation of 13 meters, containing UCSB and Goleta Beach."
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
         )
         
-        # Extract and return response
-        if response and response.choices:
-            return jsonify({"response": response.choices[0].message.content})
+        if hasattr(completion.choices[0].message, 'content'):
+            return jsonify({"response": completion.choices[0].message.content})
         
         return jsonify({"error": "No response generated"}), 500
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return jsonify({"error": "Failed to process message. Please try again."}), 500
+        return jsonify({"error": "Failed to process message"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

@@ -14,7 +14,10 @@
 
         <div class="chat-input-container">
             <input type="text" id="chat-input" placeholder="Type your question here..." class="chat-input">
-            <button id="send-button" class="predict-button">Send</button>
+            <button id="send-button" class="predict-button">
+                <span id="button-text">Send</span>
+                <div id="loading-spinner" class="spinner" style="display: none;"></div>
+            </button>
         </div>
 
         <div class="button-container">
@@ -29,6 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatBox = document.getElementById('chat-box');
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
+    const buttonText = document.getElementById('button-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    function setLoading(isLoading) {
+        sendButton.disabled = isLoading;
+        buttonText.style.display = isLoading ? 'none' : 'inline';
+        loadingSpinner.style.display = isLoading ? 'inline-block' : 'none';
+    }
 
     function addMessage(text, isUser) {
         const messageDiv = document.createElement('div');
@@ -42,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // Add user message
+        setLoading(true);
         addMessage(message, true);
         chatInput.value = '';
 
@@ -56,19 +67,55 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
-            addMessage(data.response, false);
+            
+            if (data.error) {
+                addMessage('Sorry, I encountered an error. Please try again.', false);
+            } else {
+                addMessage(data.response, false);
+            }
         } catch (error) {
             console.error('Error:', error);
             addMessage('Sorry, I encountered an error. Please try again.', false);
+        } finally {
+            setLoading(false);
         }
     }
 
     sendButton.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             sendMessage();
         }
     });
 });
 </script>
+
+<style>
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.predict-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.predict-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+</style>
 {% endblock %} 
