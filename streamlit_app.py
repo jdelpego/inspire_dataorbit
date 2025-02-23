@@ -67,7 +67,7 @@ def get_elevation(lat, lon):
 @st.cache_data
 def create_map(lat, lon, zoom=5):
     m = folium.Map(location=[lat, lon], zoom_start=zoom)
-    folium.Marker(location=[lat, lon]).add_to(m)
+    folium.Marker(location=[lat, lon], popup="Selected Location").add_to(m)
     return m
 
 # Get current page
@@ -83,22 +83,21 @@ if tab == "Home":
     
     lat, lon = 34.4356, -119.8276
     m = create_map(lat, lon)
-    map_result = st_folium(m, width=700)
+    map_result = st_folium(create_map(lat, lon), width=700)
     
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
         if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
             latitude = clicked_location["lat"]
             longitude = clicked_location["lng"]
-            elevation = get_elevation(latitude, longitude)
-            st.write(f"**Latitude:** {latitude}")
-            st.write(f"**Longitude:** {longitude}")
-            st.write(f"**Altitude:** {elevation:.2f} meters" if elevation else "Unable to retrieve elevation data.")
-    else:
-        elevation = get_elevation(lat, lon)
-        st.write(f"**Default Latitude:** {lat}")
-        st.write(f"**Default Longitude:** {lon}")
-        st.write(f"**Altitude:** {elevation:.2f} meters" if elevation else "Unable to retrieve elevation data.")
+
+    updated_map = create_map(lat, lon)
+    st_folium(updated_map, width=700)
+
+    elevation = get_elevation(lat, lon)
+    st.write(f"**Default Latitude:** {lat}")
+    st.write(f"**Default Longitude:** {lon}")
+    st.write(f"**Altitude:** {elevation:.2f} meters" if elevation else "Unable to retrieve elevation data.")
 
     st.markdown("""
         <p style='text-align: center;'>Please click on the map.</p>
