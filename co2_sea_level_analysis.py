@@ -20,11 +20,11 @@ try:
 
     # Query sea level data
     sea_level_query = """
-        SELECT Year, SmoothedGSML_GIA_sigremoved as sea_level
-        FROM sealevel
+        SELECT year as Year, `mmfrom1993-2008average` as sea_level
+        FROM 1880sealevel
     """
     sea_level_df = pd.read_sql(sea_level_query, conn)
-
+    sea_level_df['sea_level'] = pd.to_numeric(sea_level_df['sea_level'], errors='coerce')
     # Query CO2 emissions data
     co2_query = """
         SELECT Year, Emissions
