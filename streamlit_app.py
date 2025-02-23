@@ -228,7 +228,7 @@ tab = query_params.get("page")
 if tab == "Home" or tab == None:
     st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
-        <h1 style='text-align: center; color: #60a7f7;'>🌊 Sea Level Predictor</h1>
+        <h1 style='text-align: center; margin-top: 50px; color: #60a7f7;'>🌊 Sea Level Predictor</h1>
         <p style='text-align: center;'>Prediction Model</p>
     """, unsafe_allow_html=True)
 
@@ -309,7 +309,7 @@ if tab == "Home" or tab == None:
         st.warning("Please select a valid location to enable predictions.")
 
     st.markdown("""
-        <p style='text-align: center;'>Please click on the map.</p>
+        <p style='text-align: center; margin-top: 40px;'>Please click on the map.</p>
         <p style='text-align: center;'>This model predicts when a place will sink due to rising sea levels.</p>
         <div style='text-align: center; font-size: 14px; color: gray;'>
             <p>©Inspire, Inc.</p>
