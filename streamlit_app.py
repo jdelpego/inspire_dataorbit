@@ -74,7 +74,7 @@ def create_map(lat, lon, zoom=5):
     return m
 
 # Get current page
-query_params = st.experimental_get_query_params()
+query_params = st.query_params()
 tab = query_params.get("page", ["Home"])[0]
 
 if tab == "Home":
@@ -102,9 +102,13 @@ if tab == "Home":
             lon = clicked_location["lng"]
 
     elevation = get_elevation(lat, lon)
-    st.write(f"**Default Latitude:** {lat}")
-    st.write(f"**Default Longitude:** {lon}")
-    st.write(f"**Altitude:** {elevation:.2f} meters" if elevation else "Unable to retrieve elevation data.")
+    st.markdown(f"""
+    <div style="text-align: center; font-size: 18px;">
+        <p><strong>Latitude:</strong> {lat}</p>
+        <p><strong>Longitude:</strong> {lon}</p>
+        <p><strong>Altitude:</strong> {elevation:.2f} meters</p>
+    </div>
+""", unsafe_allow_html=True)
 
     st.markdown("""
         <p style='text-align: center;'>Please click on the map.</p>
