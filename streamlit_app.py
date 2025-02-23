@@ -1,4 +1,9 @@
 import streamlit as st
+import openai
+import os
+import sounddevice as sd
+import wavio
+import tempfile
 import folium
 import requests
 from streamlit_folium import st_folium
@@ -17,6 +22,8 @@ from bokeh.models import ColumnDataSource, HoverTool
 from sklearn.linear_model import Ridge
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
+groq_api_key = st.secrets["api_key"]["groqapi_key"]
+openai_api_key = st.secrets["api_key"]["openai_key"]
 
 st.markdown("""
     <style>
@@ -80,6 +87,7 @@ st.markdown("""
     <div class="navbar">
         <a target="_self" href="?page=Home">🏠 Home</a>
         <a target="_self" href="?page=resources">📚 Resources</a>
+        <a target="_self" href="?page=chatbot">🤖 Chat Bot</a>
     </div>
 """, unsafe_allow_html=True)
 
@@ -97,6 +105,29 @@ class ClearMarkerOnClick(MacroElement):
         });
         {% endmacro %}
     """)
+
+def record_audio(duration=5, samplerate=44100):
+    st.write("Recording... Speak now!")
+    audio = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='int16')
+    sd.wait()
+    
+    # Save the recording to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmpfile:
+        wavio.write(tmpfile.name, audio, samplerate, sampwidth=2)
+        return tmpfile.name
+    
+def transcribe_audio(file_path):
+    with open(file_path, "rb") as audio_file:
+        response = openai.Audio.transcribe("whisper-1", audio_file, api_key=openai_api_key)
+        return response["text"]
+
+# Function to get chatbot response from Groq API
+def get_groq_response(user_input):
+    url = "https://api.groq.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
+    data = {"model": "mixtral-8x7b-32768", "messages": [{"role": "user", "content": user_input}]}
+    response = requests.post(url, json=data, headers=headers)
+    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response.")
 
 def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_year, max_years=500):
     """
@@ -419,3 +450,35 @@ elif tab == "resources":
         - [UN Environment Programme](https://www.unep.org/): Offers guidelines and frameworks for managing climate change and its effects, including sea level rise.
         """
     )
+
+elif tab == "chatbot":
+    st.title("🗣️ Groq Multimodal Chatbot")
+
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+
+    for message in st.session_state["messages"]:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    user_input = st.text_input("Type your message or use voice input:", key="user_input")
+
+    if st.button("🎤 Speak"):
+        audio_file = record_audio()
+        transcribed_text = transcribe_audio(audio_file)
+        os.remove(audio_file) 
+        st.text(f"You said: {transcribed_text}")
+        user_input = transcribed_text  
+
+
+    if user_input:
+
+        st.session_state["messages"].append({"role": "user", "content": user_input})
+        
+
+        response = get_groq_response(user_input)
+        st.session_state["messages"].append({"role": "assistant", "content": response})
+        
+        with st.chat_message("assistant"):
+            st.write(response)
