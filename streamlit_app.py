@@ -14,7 +14,7 @@ from folium import MacroElement
 from jinja2 import Template
 
 
-google_maps_api_key = str(st.secrets["api_key"]["google_maps_api_key"])
+google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
 st.markdown("""
     <style>
@@ -205,9 +205,9 @@ def get_elevation(lat, lon):
         if result["status"] == "OK":
             return result["results"][0]["elevation"]
         else:
-            raise Exception("Status not OK getting elevation" + str(result))
+            raise Exception("Status not OK getting elevation" + str(result) + google_maps_api_key)
     else:
-        raise Exception("Error getting elevation 200 response" + str(result))
+        raise Exception("Error getting elevation 200 response" + str(result) + google_maps_api_key)
         return None
 
 @st.cache_data
