@@ -241,6 +241,7 @@ if tab == "Home" or tab == None:
     map_result = st_folium(m, width="100%", height=500)
 
     flooding_year = -1
+    years_until = -1
 
     st.markdown('</div>', unsafe_allow_html=True)
     elevation = 0
