@@ -128,7 +128,10 @@ def recognize_speech():
 def get_groq_response(user_input):
     response = groq_client.chat.completions.create(
         model="mixtral-8x7b-32768",
-        messages=[{"role": "user", "content": user_input}]
+        messages=[
+            {"role": "system", "content": "You are AI assistant helping users understand the impact of rising sea levels. Please only provide information related to this topic."}, 
+            {"role": "user", "content": user_input}
+        ]
     )
     return response.choices[0].message.content if response.choices else "No response."
 
