@@ -82,8 +82,8 @@ if tab == "Home":
     """, unsafe_allow_html=True)
     
     lat, lon = 34.4356, -119.8276
-    m = create_map(lat, lon)
-    map_result = st_folium(create_map(lat, lon), width=700)
+
+    map_result = st_folium(create_map(lat, lon), width=700, key="mainmap")
     
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
@@ -91,8 +91,10 @@ if tab == "Home":
             latitude = clicked_location["lat"]
             longitude = clicked_location["lng"]
 
-    updated_map = create_map(lat, lon)
-    st_folium(updated_map, width=700)
+    updated_map = folium.Map(location=[lat, lon], zoom_start=5)
+    folium.Marker(location=[lat, lon], popup="Selected Location").add_to(updated_map)
+
+    st_folium(updated_map, width=700, key="updated_map")
 
     elevation = get_elevation(lat, lon)
     st.write(f"**Default Latitude:** {lat}")
