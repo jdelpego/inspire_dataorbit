@@ -303,28 +303,70 @@ def chat_message():
 
         client = groq.Groq(api_key=GROQ_API_KEY)
         
-        completion = client.chat.completions.create(
-            model="mixtral-8x7b-32768",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant that specializes in sea level rise and climate change. Focus on providing clear, accurate information about our prediction model that uses Ridge regression, historical data since 1880, and CO2 emissions to forecast flooding timelines. For Goleta specifically, note it's near Santa Barbara with an average elevation of 13 meters, containing UCSB and Goleta Beach."
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ]
-        )
+        system_prompt = """You are a helpful assistant specializing in sea level rise and climate change. You have access to:
+        1. A Ridge regression model (alpha=40.0) trained on historical sea level data since 1880 and CO2 emissions
+        2. Elevation data from Google Maps API
+        3. Predictions that account for quadratic year trends and CO2 emissions
+
+        For Goleta specifically:
+        - Located near Santa Barbara, CA
+        - Average elevation: 13 meters
+        - Contains UCSB and Goleta Beach
+        - Vulnerable to sea level rise due to coastal location
+
+        Provide clear, accurate information about sea level rise predictions and climate change impacts.
+        If you're unsure about something, say so rather than making assumptions."""
+
+        try:
+            # First try mixtral model
+            completion = client.chat.completions.create(
+                model="mixtral-8x7b-32768",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ],
+                temperature=0.7,
+                max_tokens=1024,
+                top_p=1,
+                stream=False
+            )
+        except Exception as model_error:
+            print(f"Mixtral model error: {str(model_error)}")
+            try:
+                # Fallback to llama model
+                completion = client.chat.completions.create(
+                    model="llama2-70b-4096",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": message}
+                    ],
+                    temperature=0.7,
+                    max_tokens=1024,
+                    top_p=1,
+                    stream=False
+                )
+            except Exception as fallback_error:
+                print(f"Fallback model error: {str(fallback_error)}")
+                return jsonify({"error": "AI models are currently unavailable. Please try again later."}), 503
+
+        if not completion or not completion.choices:
+            return jsonify({"error": "No response generated"}), 500
+
+        response_content = completion.choices[0].message.content if hasattr(completion.choices[0].message, 'content') else None
         
-        if hasattr(completion.choices[0].message, 'content'):
-            return jsonify({"response": completion.choices[0].message.content})
-        
-        return jsonify({"error": "No response generated"}), 500
+        if not response_content:
+            return jsonify({"error": "Empty response from AI model"}), 500
+
+        return jsonify({"response": response_content})
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return jsonify({"error": "Failed to process message"}), 500
+        error_message = "An error occurred while processing your message. Please try again."
+        if "rate limit" in str(e).lower():
+            error_message = "The AI service is currently busy. Please wait a moment and try again."
+        elif "api key" in str(e).lower():
+            error_message = "There's an issue with the AI service configuration. Please try again later."
+        return jsonify({"error": error_message}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
