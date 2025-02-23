@@ -88,7 +88,7 @@ with col1:
     st.image("city.jpg", width=200)
 with col2:
     st.markdown(
-        f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: Latitude: {lat:.4f}, Longitude: {lon:.4f}</span></div>',
+        f'<div class="details"><span style="color: #00796B; font-weight: bold;">Coordinates: < {lat:.4f}, {lon:.4f} ></span></div>',
         unsafe_allow_html=True
     )
     st.markdown(f'<div class="sea-level">Sea Level: {elevation:.2f} m</div>', unsafe_allow_html=True)
