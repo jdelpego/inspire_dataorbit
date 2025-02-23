@@ -19,31 +19,39 @@ st.markdown("""
     }
     .navbar {
         position: fixed;
-        background-color: #00A9A5;
+        background-color: #00A9A5 !important;
         padding: 5px;
         text-align: center;
         top: 0;
         left: 0;
         right: 0;
         width: 100%;
-        z-index: 1000;
+        z-index: 9999 !important;
     }
     .navbar a {
-        color: white;
-        padding: 7px 10px;
-        text-decoration: none;
-        font-size: 18px;
-        display: inline-block;
+        color: white !important;
+        padding: 7px 10px !important;
+        text-decoration: none !important; 
+        font-size: 18px !important;
+        display: inline-block !important;
     }
     .navbar a:hover {
         background-color: #99E1D9;
-        color: black;
-        transition: 0.3s ease-in;
+        color: black !important;
+        transition: 0.3s ease-in !important;
     }
     .content {
-        margin-top: 50px; /* Adjusted margin */
+        margin-top: 50px !important;
     }
     </style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("""
+    <div class="navbar">
+        <a href="?page=Home">Home</a>
+        <a href="?page=resources">Resources</a>
+    </div>
 """, unsafe_allow_html=True)
 
 # Function to get elevation
@@ -66,14 +74,8 @@ def create_map(lat, lon, zoom=5):
 query_params = st.experimental_get_query_params()
 tab = query_params.get("page", ["Home"])[0]
 
-st.markdown("""
-    <div class="navbar">
-        <a href="?page=Home">Home</a>
-        <a href="?page=resources">Resources</a>
-    </div>
-""", unsafe_allow_html=True)
-
 if tab == "Home":
+    st.markdown('<div class="content">', unsafe_allow_html=True)
     st.markdown("""
         <h1 style='text-align: center'>Predictor</h1>
         <p style='text-align: center;'>Prediction Model</p>
@@ -105,6 +107,7 @@ if tab == "Home":
             <p>©Inspire, Inc.</p>
         </div>
     """, unsafe_allow_html=True)
+    st.markdown('<div class="content">', unsafe_allow_html=True)
 
 elif tab == "resources":
     st.write("Resources page content here.")
