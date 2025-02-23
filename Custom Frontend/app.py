@@ -301,7 +301,10 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        client = groq.Groq(api_key=GROQ_API_KEY)
+        # Initialize Groq client with API key
+        client = groq.Groq(
+            api_key="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"
+        )
         
         # Create system prompt with context about the project
         system_prompt = """You are a helpful AI assistant for a sea level rise prediction project. 
@@ -318,13 +321,21 @@ def chat_message():
         - Contains important areas like UCSB and Goleta Beach
         
         Please provide accurate, informative responses about sea level rise, climate change, and our prediction methodology.
-        Keep responses concise and user-friendly. If asked about specific locations like Goleta, use the elevation data mentioned above."""
+        Keep responses concise and user-friendly. If asked about specific locations like Goleta, use the elevation data mentioned above.
+        
+        Always respond in a helpful and informative way, providing specific details when possible."""
 
-        # Create the chat completion
-        completion = client.chat.completions.create(
+        # Create the chat completion with the official format
+        response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message}
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
             ],
             model="mixtral-8x7b-32768",
             temperature=0.7,
@@ -334,13 +345,12 @@ def chat_message():
         )
 
         # Extract the response text
-        if completion and completion.choices and len(completion.choices) > 0:
-            response = completion.choices[0].message.content
-            if not response:
-                return jsonify({"error": "Empty response from AI"}), 500
-            return jsonify({"response": response})
-        else:
-            return jsonify({"error": "No response generated"}), 500
+        if hasattr(response, 'choices') and len(response.choices) > 0:
+            assistant_message = response.choices[0].message.content
+            if assistant_message:
+                return jsonify({"response": assistant_message})
+            
+        return jsonify({"error": "No response generated"}), 500
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
