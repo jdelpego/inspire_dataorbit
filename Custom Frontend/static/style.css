@@ -415,13 +415,15 @@ body {
 
 /* Bokeh chart customization */
 .bk-root {
-    width: auto !important;
+    width: 100% !important;
     height: auto !important;
     display: block !important;
+    margin: 0 auto !important;
 }
 
 .bk-plot-layout {
     margin: 0 auto !important;
+    width: 100% !important;
 }
 
 .bk-tool-box {
@@ -446,7 +448,7 @@ body {
     padding: 2rem;
     border-radius: 20px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 2rem auto;
     box-shadow: 0 0 30px rgba(0, 153, 255, 0.3);
     text-align: center;
@@ -457,12 +459,10 @@ body {
     padding: 1.5rem;
     background: rgba(0, 0, 51, 0.3);
     border-radius: 15px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
-    display: flex;
-    justify-content: center;
 }
 
 .chart-description {
