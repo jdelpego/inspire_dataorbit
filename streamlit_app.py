@@ -139,10 +139,6 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     flooding_year = years_needed[flooding_levels][0]
     years_until_flooding = flooding_year - start_year
 
-    # TEMP
-    years_until_flooding *= 2.5
-    flooding_year = years_until_flooding + start_year
-
     return flooding_year, years_until_flooding
 
 
