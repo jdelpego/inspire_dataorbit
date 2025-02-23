@@ -313,7 +313,7 @@ if tab == "Home" or tab == None:
     if predict_url:
         st.markdown(f"""
             <div class="predict-button" {'hidden' if not (lat and lon and elevation) else ''}>
-                <a href="{predict_url}" target="_self">🔮 Predict</a>
+                <a href="{predict_url}" target="">🔮 Predict</a>
             </div>
         """, unsafe_allow_html=True)
     else:
