@@ -211,37 +211,53 @@ def chart():
         
         # Create Bokeh figure with a dark theme
         p = figure(
-            title="Global Mean Sea Level Rise",
+            title="Projected Sea Level Rise",
             x_axis_label='Year',
-            y_axis_label='Sea Level (mm)',
-            height=500,
-            width=800,
-            background_fill_color='#1a1a1a',
-            border_fill_color='transparent',
-            outline_line_color='#333333'
+            y_axis_label='Sea Level (meters)',
+            height=600,
+            width=1000,
+            background_fill_color='#000033',
+            border_fill_alpha=0,
+            outline_line_color=None,
+            toolbar_location='right'
         )
         
         # Style the plot
-        p.title.text_color = 'white'
-        p.title.text_font_size = '16px'
-        p.xaxis.axis_label_text_color = 'white'
-        p.yaxis.axis_label_text_color = 'white'
-        p.xaxis.major_label_text_color = 'white'
-        p.yaxis.major_label_text_color = 'white'
+        p.title.text_color = '#ffffff'
+        p.title.text_font_size = '24px'
+        p.title.text_font = 'Inter'
+        p.title.text_font_style = 'normal'
+        p.title.align = 'center'
+        
+        p.xaxis.axis_label_text_color = '#ffffff'
+        p.yaxis.axis_label_text_color = '#ffffff'
+        p.xaxis.major_label_text_color = '#ffffff'
+        p.yaxis.major_label_text_color = '#ffffff'
+        p.xaxis.axis_label_text_font_size = '16px'
+        p.yaxis.axis_label_text_font_size = '16px'
+        p.xaxis.major_label_text_font_size = '12px'
+        p.yaxis.major_label_text_font_size = '12px'
+        
+        # Style the grid
         p.grid.grid_line_color = '#333333'
+        p.grid.grid_line_alpha = 0.3
         
         # Create a ColumnDataSource
         source = ColumnDataSource(df)
         
+        # Add scatter points
+        p.scatter('Year', 'GMSL', source=source, size=8, color='#ff4444', alpha=0.6)
+        
         # Add the line to the figure
-        p.line('Year', 'GMSL', source=source, line_width=2, color="#4a90e2")
+        p.line('Year', 'GMSL', source=source, line_width=2, color="#4a90e2", line_alpha=0.8)
         
         # Add hover tool
         hover = HoverTool(
             tooltips=[
                 ('Year', '@Year'),
                 ('Sea Level', '@GMSL{0.0} mm')
-            ]
+            ],
+            mode='vline'
         )
         p.add_tools(hover)
         
