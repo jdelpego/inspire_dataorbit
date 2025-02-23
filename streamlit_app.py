@@ -185,7 +185,9 @@ def get_elevation(lat, lon):
         result = response.json()
         if result["status"] == "OK":
             return result["results"][0]["elevation"]
-    return None
+    else:
+        print(f"ERROR: {response.status_code}")
+        return None
 
 @st.cache_data
 def create_map(lat, lon, zoom=5):
