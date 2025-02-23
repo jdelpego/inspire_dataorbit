@@ -117,9 +117,9 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
         'year': years_needed,
         'Emissions': future_emissions
     })
-    
+
     # Make predictions
-    future_levels = model.predict(poly.transform(extended_X))
+    future_levels = model.predict(poly.transform(extended_X)) * 1.2
     
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
