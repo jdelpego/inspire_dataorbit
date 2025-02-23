@@ -12,6 +12,7 @@ from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import INLINE
 from bokeh.models import ColumnDataSource, HoverTool
+import groq
 
 # Load environment variables
 load_dotenv()
@@ -25,8 +26,9 @@ DB_PORT = os.getenv('DB_PORT', '3333')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
-if not all([GOOGLE_MAPS_API_KEY, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME]):
+if not all([GOOGLE_MAPS_API_KEY, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, GROQ_API_KEY]):
     raise ValueError("Missing required environment variables")
 
 GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_API_KEY.strip('"\'')
@@ -287,6 +289,48 @@ def chart():
     except Exception as e:
         print(f"Error generating chart: {str(e)}")
         return redirect('/')
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
+@app.route('/chat', methods=['POST'])
+def chat_message():
+    try:
+        message = request.json.get('message')
+        if not message:
+            return jsonify({"error": "No message provided"}), 400
+
+        client = groq.Groq(api_key=GROQ_API_KEY)
+        
+        # Create system prompt with context about the project
+        system_prompt = """You are a helpful AI assistant for a sea level rise prediction project. 
+        The project uses machine learning (Ridge regression) to predict when locations will be affected by sea level rise.
+        Key features:
+        - Uses historical sea level data and CO2 emissions
+        - Predicts flooding years based on elevation
+        - Includes a 2.5x multiplier for conservative estimates
+        - Uses Google Maps API for elevation data
+        
+        Please provide accurate, informative responses about sea level rise, climate change, and our prediction methodology.
+        Keep responses concise and user-friendly."""
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
+            model="mixtral-8x7b-32768",
+            temperature=0.5,
+            max_tokens=500,
+        )
+
+        response = chat_completion.choices[0].message.content
+        return jsonify({"response": response})
+
+    except Exception as e:
+        print(f"Chat error: {str(e)}")
+        return jsonify({"error": "Failed to process message"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

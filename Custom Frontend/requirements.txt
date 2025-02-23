@@ -7,3 +7,4 @@ scikit-learn==1.4.1.post1
 singlestoredb==1.0.3
 gunicorn==21.2.0
 bokeh==3.3.4
+groq==0.4.2
