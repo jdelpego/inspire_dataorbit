@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from dotenv import load_dotenv
 from singlestoredb import connect, DatabaseError
 import sys
@@ -79,11 +79,13 @@ try:
     X = merged_df[['year', 'Emissions']]
     y = merged_df['sea_level']
     
-    # Create and train model
-    poly = PolynomialFeatures(degree=2, include_bias=False)
-    X_poly = poly.fit_transform(X)
-    model = LinearRegression()
-    model.fit(X_poly, y)
+    # Add quadratic term for year
+    X['year^2'] = X['year'] ** 2
+    X_model = X[['year', 'year^2', 'Emissions']]
+    
+    # Create and train model using Ridge regression
+    model = Ridge(alpha=40.0)
+    model.fit(X_model, y)
     
     # Store current state
     START_YEAR = merged_df['year'].max()
@@ -123,20 +125,19 @@ def predict_flooding_year(altitude_mm, model=model, future_X=future_X, base_sea_
             'Emissions': future_emissions
         })
         
-        # Make predictions with adjustment factor of 1.2 to match streamlit app
-        future_levels = model.predict(poly.transform(extended_X)) * 1.2
+        # Add quadratic term and make predictions
+        extended_X['year^2'] = extended_X['year']**2
+        future_levels = model.predict(extended_X[['year', 'year^2', 'Emissions']])
+        
+        # Find when sea level reaches the altitude
         sea_level_rise = future_levels - base_sea_level
-        flooding_levels = sea_level_rise >= altitude_mm * 1000  # Convert to mm and match streamlit multiplication
+        flooding_levels = sea_level_rise >= altitude_mm * 1000
         
         if not any(flooding_levels):
             return None, None
         
         flooding_year = int(years_needed[flooding_levels][0])
         years_until_flooding = int(flooding_year - start_year)
-        
-        # Apply the same 2.5x factor as in streamlit app
-        years_until_flooding = int(years_until_flooding * 2.5)
-        flooding_year = years_until_flooding + start_year
         
         return flooding_year, years_until_flooding
     except Exception as e:
