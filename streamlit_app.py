@@ -185,6 +185,8 @@ def get_elevation(lat, lon):
         result = response.json()
         if result["status"] == "OK":
             return result["results"][0]["elevation"]
+        else:
+            print(f"ERROR: {reponse["status]}")
     else:
         print(f"ERROR: {response.status_code}")
         return None
