@@ -14,7 +14,7 @@ from folium import MacroElement
 from jinja2 import Template
 
 
-google_maps_api_key = st.secrets.google_maps_api_key
+google_maps_api_key = str(st.secrets["api_key"]["google_maps_api_key"])
 
 st.markdown("""
     <style>
