@@ -38,10 +38,16 @@ st.markdown("""
         left: 0;
         right: 0;
         width: 100%;
-        z-index: 10000 !important; /* Ensure navbar stays on top */
+        padding: 10px 0;
+        z-index: 10000 !important; 
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 
     }
+            
+    .content {
+        margin-top: 80px;
+    }
+
     .navbar a {
         color: white !important;
         padding: 12px 20px !important;
