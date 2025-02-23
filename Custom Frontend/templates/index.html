@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Level Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1 class="title">Sea Level Predictor</h1>
+            <p class="subtitle">Click anywhere on the map to check the elevation and predict potential flooding based on sea level rise</p>
+            <a href="/resources" class="resources-button">📚 Learn How to Help</a>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="map-wrapper">
+                <div id="map"></div>
+            </div>
+            
+            <div id="info-panel" class="info-panel" style="display: none;">
+                <h3>Location Selected</h3>
+                <p id="latitude"></p>
+                <p id="longitude"></p>
+                <p id="elevation"></p>
+                <button id="predict-button" class="predict-button">
+                    🔮 Predict
+                </button>
+            </div>
+
+            <div id="error-panel" class="info-panel error-panel" style="display: none;">
+                <p id="error-message" style="color: #ff6b6b; font-weight: bold;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedLat, selectedLng, selectedElevation;
+        
+        // Initialize map centered on UCSB
+        const map = L.map('map').setView([34.4140, -119.8489], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Handle map clicks
+        map.on('click', async function(e) {
+            const { lat, lng } = e.latlng;
+            selectedLat = lat;
+            selectedLng = lng;
+            
+            try {
+                const response = await fetch('/get_elevation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lat, lng })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('error-panel').style.display = 'none';
+                    document.getElementById('info-panel').style.display = 'block';
+                    document.getElementById('latitude').textContent = `Latitude: ${lat.toFixed(4)}°`;
+                    document.getElementById('longitude').textContent = `Longitude: ${lng.toFixed(4)}°`;
+                    document.getElementById('elevation').textContent = `Sea Level: ${data.elevation.toFixed(2)} m`;
+                    selectedElevation = data.elevation;
+                } else {
+                    document.getElementById('info-panel').style.display = 'none';
+                    document.getElementById('error-panel').style.display = 'block';
+                    document.getElementById('error-message').textContent = data.error || 'Error getting elevation data';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('info-panel').style.display = 'none';
+                document.getElementById('error-panel').style.display = 'block';
+                document.getElementById('error-message').textContent = 'Error getting elevation data';
+            }
+        });
+
+        document.getElementById('predict-button').addEventListener('click', function() {
+            if (selectedLat && selectedLng) {
+                window.location.href = `/predict?lat=${selectedLat}&lng=${selectedLng}&elevation=${selectedElevation}`;
+            }
+        });
+    </script>
+</body>
+</html>

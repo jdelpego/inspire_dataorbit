@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Details - Sea Level Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container details-page">
+        <div class="details-container">
+            <h1 class="title">Location Details</h1>
+            
+            <div class="coordinates-section">
+                <h3>Coordinates: Latitude: {{ "%.4f"|format(lat) }}, Longitude: {{ "%.4f"|format(lng) }}</h3>
+                <div class="sea-level">Sea Level: {{ "%.2f"|format(elevation) }} m</div>
+            </div>
+
+            <div class="prediction-grid">
+                <div class="prediction-box">
+                    <h3>Submersion Year</h3>
+                    <div class="prediction-value">
+                        {{ flooding_year if flooding_year else "0" }}
+                    </div>
+                </div>
+
+                <div class="prediction-box">
+                    <h3>Time Remaining</h3>
+                    <div class="prediction-value">
+                        {{ years_until_flooding if years_until_flooding else "0" }} years
+                    </div>
+                </div>
+            </div>
+
+            <a href="/" class="back-button">← Back to Map</a>
+        </div>
+    </div>
+</body>
+</html> 
