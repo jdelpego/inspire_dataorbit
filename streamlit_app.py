@@ -15,6 +15,11 @@ google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
 
 st.markdown("""
     <style>
+    .block-container {
+        padding-top: 0px !important;
+        margin-top: 0px !important;
+    }
+          
     .css-18e3th9 { 
         padding-top: 0rem; 	
         padding-bottom: 0rem;    
