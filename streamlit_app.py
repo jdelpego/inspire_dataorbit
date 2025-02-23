@@ -34,7 +34,7 @@ st.markdown("""
         background-color: #00A9A5 !important;
         padding: 15px;
         text-align: center;
-        top: 0;
+        top: 50px !important;
         left: 0;
         right: 0;
         width: 100%;
