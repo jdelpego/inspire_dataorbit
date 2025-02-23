@@ -3,11 +3,11 @@ import urllib.parse
 
 # Retrieve query parameters and convert to float (handle empty values safely)
 query_params = st.query_params
-lat = float(query_params.get("lat", ["0"])[0]) if query_params.get("lat", [""])[0] else 0.0
-lon = float(query_params.get("lon", ["0"])[0]) if query_params.get("lon", [""])[0] else 0.0
-elevation = float(query_params.get("elevation", ["0"])[0]) if query_params.get("elevation", [""])[0] else 0.0
-flooding_year = float(query_params.get("flooding_year", ["0"])[0]) if query_params.get("flooding_year", [""])[0] else 0.0
-years_until = float(query_params.get("years_until", ["0"])[0]) if query_params.get("years_until", [""])[0] else 0.0
+lat = float(query_params.get("lat")) if query_params.get("lat") else 0.0
+lon = float(query_params.get("lon")) if query_params.get("lon") else 0.0
+elevation = float(query_params.get("elevation")) if query_params.get("elevation") else 0.0
+flooding_year = float(query_params.get("flooding_year")) if query_params.get("flooding_year") else 0.0
+years_until = float(query_params.get("years_until")) if query_params.get("years_until") else 0.0
 
 st.markdown(
     """
