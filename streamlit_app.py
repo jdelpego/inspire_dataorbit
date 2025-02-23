@@ -1,19 +1,17 @@
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
+import pydeck as pdk
+from geopy.geocoders import Nominatim
 
 #navigation bar
 st.markdown("""
     <style>
     .css-18e3th9 { 
         padding-top: 0rem; 	
-        padding-bottom: 0rem; 
-        background-color: #F4E1D2;    
+        padding-bottom: 0rem;    
     }
     body {
         margin: 0;
         padding: 0;
-        background-color: #F4E1D2;  
     }
     .navbar {
         background-color: #00A9A5;
@@ -63,12 +61,12 @@ st.markdown("""
     }
     h1, h3 {
         color: #005F60; 
-        font-family: 'Tahoma', sans-serif;
+        font-family: 'Roboto', sans-serif;
     }
 
     p {
-        color: #003B2D; 
-        font-family: 'Tahoma', sans-serif;
+        color: #3E5C5B; 
+        font-family: 'Roboto', sans-serif;
     }
 
     .map-container {
@@ -95,51 +93,94 @@ tab = query_params.get("page", ["Home"])[0]  # Default to "home" if no parameter
 if tab == "Home":
     # Click
     st.markdown("""
-        <h1 style='font-family: Tahoma; font-size: 50px;'>Predictor</h1>
-        <p style='font-family: Tahoma; font-size: 20px; text-align: center; padding-right: 10px;'>&nbsp;Prediction Model</p>
+        <h1 style='font-family: Roboto; font-size: 50px; text-align: center'>Predictor</h1>
+        <p style='font-family: Roboto; font-size: 20px; text-align: center; padding-right: 10px;'>&nbsp;Prediction Model</p>
     """, unsafe_allow_html=True)
     st.write('')
     st.write('')
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    st.markdown("<h3 style='text-align: center; font-family: 'Tahoma''>Click on the map to select a location:</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; font-family: 'Roboto''>Click on the map to select a location:</h3>", unsafe_allow_html=True)
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
+    geolocator = Nominatim(user_agent="inspire-app")
+
+    def cityzip_from_coords(lat, lon):
+        try:
+            location = geolocator.reverse((lat, lon), language="en", exactly_one=True)
+            if location:
+                address = location.raw.get("address", {})
+                city = address.get("city", "Unknown")
+                zipcode = address.get("postcode", "Unknown")
+                return city, zipcode
+            return "Unknown Location", "Unknown Zipcode"
+        except Exception as e:
+            st.error(f"Error during geocoding: {e}")
+            return "Error", "Error"
+
+
     def create_map(lat, lon, zoom=5):
-        m = folium.Map(location=[40.0, -120.0], zoom_start=5)
-        folium.Marker(location=[40.0, -120.0]).add_to(m) 
-        m.add_child(folium.ClickForMarker()) # Add click functionality to the map
-        return m
+        return pdk.Deck(
+            initial_view_state=pdk.ViewState(
+                latitude=40.7128,  
+                longitude=-74.0060,
+                zoom=5,
+                pitch=0
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    [],
+                    get_position="[longitude, latitude]",
+                    get_radius=20000,
+                    get_fill_color=[255, 0, 0],
+                    pickable=True,
+                    opacity=0.5
+                ),
+            ]
+        )
 
-
-    # Initialize map
-    m = create_map(40.0, -120.0)
+    st.title("Sea level Rise Prediction")
+    st.markdown("""
+    <style>
+    .map-container {
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+    
+    map = create_map()
+    st.pydeck_chart(map)
    
-    # Render map 
-    map_result = st_folium(m, width=700)
+    if st.session_state.get("last_clicked", None): 
+       lat, lon = st.session_state["last_clicked"]
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    city, zipcode = cityzip_from_coords(lat, lon)
 
-    if map_result and "last_clicked" in map_result: 
-        clicked_location = map_result["last_clicked"]
+    st.markdown(f"""
+        <p style='text-align: center;'>
+            <strong>Latitude:</strong> {lat:.6f} <br>
+            <strong>Longitude:</strong> {lon:.6f} <br>
+            <strong>City:</strong> {city} <br>
+            <strong>Zipcode:</strong> {zipcode}
+        </p>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        if clicked_location and "lat" in clicked_location and "lng" in clicked_location:
-            latitude = clicked_location["lat"]
-            longitude = clicked_location["lng"]
-                        
-    # Display latitude and longitude separately
-            st.markdown(
-                f"""
-                <p style='text-align: center;'>
-                    <strong>Latitude:</strong> {latitude:.6f} <br>
-                    <strong>Longitude:</strong> {longitude:.6f}
-                </p>
-                """,
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown("<p style='text-align: center;'>Please click on the map.</p>", unsafe_allow_html=True)
+    def on_click(event):
+        lat = event["latitude"]
+        lon = event["longitude"]
+
+        st.session_state["last_clicked"] = (lat, lon)
+
+        st.experimental_rerun()
+
+    map.on_click(on_click)
+
+    st.markdown("<p style='text-align: center;'>Please click on the map.</p>", unsafe_allow_html=True)
 
     st.markdown("<p style='text-align: center; '>This model predicts the likelihood of coastal shrinkage and its effects on house pricing.</p>", unsafe_allow_html=True)
 

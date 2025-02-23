@@ -1,2 +1,6 @@
 [theme]
-  primaryColor="#FF4B4B"
+backgroundColor="#FFFFFF"
+base = "light"
+
+[global]
+font = "serif"
