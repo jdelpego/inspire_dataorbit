@@ -103,7 +103,7 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
     max_years: maximum number of years to predict into the future
     """
     # Extend prediction range if needed
-    years_needed = np.arange(start_year + 1, start_year + max_years + 1)
+    years_needed = np.arange(start_year + 1, start_year + max_years + 1) * 100
 
     nweights =  future_X['year'] - np.min(future_X['year']) + 1
 
@@ -125,7 +125,7 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
 
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
-    flooding_levels = sea_level_rise >= altitude_mm*100
+    flooding_levels = sea_level_rise >= altitude_mm*1000
 
     if not any(flooding_levels):
         return None, None  # Location won't flood within max_years
