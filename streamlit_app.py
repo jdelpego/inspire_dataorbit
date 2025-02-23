@@ -260,6 +260,8 @@ if tab == "Home" or tab == None:
         <p><strong>📍Latitude:</strong> {lat}</p>
         <p><strong>📍Longitude:</strong> {lon}</p>
         <p><strong>📏Altitude:</strong> {elevation:.2f} meters</p>
+        <p><strong> flooding year:</strong> {flooding_year}</p>
+        <p><strong> years until:</strong> {years_until}</p>
     </div>
 """, unsafe_allow_html=True)
     
