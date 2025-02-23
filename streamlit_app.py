@@ -107,7 +107,7 @@ class ClearMarkerOnClick(MacroElement):
 load_dotenv()
 
 google_maps_api_key = st.secrets["api_key"]["google_maps_api_key"]
-groqapi_key = os.getenv("groqapi_key")
+groqapi_key = st.secrets["api_key"]["groqapi_key"]
 groq_client = groq.Groq(api_key=groqapi_key)
 
 def recognize_speech():
