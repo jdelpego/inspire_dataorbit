@@ -239,20 +239,17 @@ if tab == "Home" or tab == None:
         <p style='text-align: center;'>A Rising Sea Level Prediction Model</p>
     """, unsafe_allow_html=True)
 
-    lat, lon = 34.4356, -119.8276
-    flooding_year, years_until = 0.0, 0.0
+    lat, lon = None, None
+    elevation = None
+    flooding_year, years_until = None, None
 
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
 
-    m = create_map(lat, lon)
+    m = create_map(34.4356 if not lat else lat, -119.8276 if not lon else lon)
 
     map_result = st_folium(m, width="100%", height=500)
 
-    flooding_year = -1
-    years_until = -1
-
     st.markdown('</div>', unsafe_allow_html=True)
-    elevation = 0
     if map_result and "last_clicked" in map_result:
         clicked_location = map_result["last_clicked"]
 
@@ -273,12 +270,12 @@ if tab == "Home" or tab == None:
             #map_result = st_folium(m, width="100%", height=500)
 
     st.markdown(f"""
-    <div style="text-align: center; font-size: 18px;">
-        <p><strong>📍Latitude:</strong> {lat}</p>
-        <p><strong>📍Longitude:</strong> {lon}</p>
-        <p><strong>📏Altitude:</strong> {elevation:.2f} meters</p>
-        <p><strong> flooding year:</strong> {flooding_year}</p>
-        <p><strong> years until:</strong> {years_until}</p>
+    <div style="text-align: center; font-size: 18px;" {'hidden' if not (lat and lon and elevation) else ''}>
+        <p><strong>📍Latitude:</strong> {'N/A' if not lat else lat}</p>
+        <p><strong>📍Longitude:</strong> {'N/A' if not lon else lon}</p>
+        <p><strong>📏Altitude:</strong> {'N/A' if not elevation else (f'{elevation:.2f} meters')}</p>
+        <p><strong> flooding year:</strong> {'N/A' if not flooding_year else flooding_year}</p>
+        <p><strong> years until:</strong> {'N/A' if not years_until else years_until}</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -314,7 +311,7 @@ if tab == "Home" or tab == None:
 
     if predict_url:
         st.markdown(f"""
-            <div class="predict-button">
+            <div class="predict-button" {'hidden' if not (lat and lon and elevation) else ''}>
                 <a href="{predict_url}" target="_self">🔮 Predict</a>
             </div>
         """, unsafe_allow_html=True)
