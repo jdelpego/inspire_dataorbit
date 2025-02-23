@@ -126,7 +126,7 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
 
     # Find when sea level reaches the altitude
     sea_level_rise = future_levels - base_sea_level
-    flooding_levels = sea_level_rise >= altitude_mm*100
+    flooding_levels = sea_level_rise >= altitude_mm*1000
 
     if not any(flooding_levels):
         return None, None  # Location won't flood within max_years
