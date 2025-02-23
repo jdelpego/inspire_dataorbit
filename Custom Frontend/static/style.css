@@ -336,6 +336,108 @@ body {
 .header-actions {
     margin-bottom: 2rem;
     text-align: center;
+<<<<<<< HEAD
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.header-actions .resources-button {
+    flex: 1;
+    max-width: 300px;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(74, 144, 226, 0.1) 100%);
+    color: #78b6ff;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    backdrop-filter: blur(5px);
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.header-actions .resources-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 153, 255, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.button-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.button-container .back-button,
+.button-container .resources-button {
+    flex: 1;
+    max-width: 300px;
+    padding: 1.2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    text-decoration: none;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button-container .back-button {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    color: white;
+}
+
+.button-container .resources-button {
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(74, 144, 226, 0.1) 100%);
+    color: #78b6ff;
+}
+
+.button-container .back-button:hover,
+.button-container .resources-button:hover,
+.header-actions .resources-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 153, 255, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.button-container .back-button:active,
+.button-container .resources-button:active,
+.header-actions .resources-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 153, 255, 0.2);
+}
+
+/* Bokeh chart customization */
+.bk-root {
+    background: transparent !important;
+}
+
+.bk-plot-layout {
+    background: transparent !important;
+}
+
+.bk-tool-box {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+.bk-tooltip {
+    background: rgba(0, 0, 51, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    color: white !important;
+    font-family: 'Inter', sans-serif !important;
+    backdrop-filter: blur(10px) !important;
 }
 
 .chart-container {
@@ -400,50 +502,6 @@ body {
     gap: 0.5rem;
     font-size: 1.1rem;
     backdrop-filter: blur(5px);
-}
-
-.button-container {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-.button-container .back-button,
-.button-container .resources-button {
-    flex: 1;
-    padding: 1rem;
-    text-align: center;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-}
-
-.button-container .back-button:hover,
-.button-container .resources-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 153, 255, 0.2);
-}
-
-/* Bokeh chart customization */
-.bk-root {
-    background: transparent !important;
-}
-
-.bk-plot-layout {
-    background: transparent !important;
-}
-
-.bk-tool-box {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
-    backdrop-filter: blur(5px) !important;
-}
-
-.bk-tooltip {
-    background: rgba(0, 0, 51, 0.9) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-    color: white !important;
-    font-family: 'Inter', sans-serif !important;
-    backdrop-filter: blur(10px) !important;
+=======
+>>>>>>> 1f7c537c67de96488fe5fb64c74c7d0b868e889a
 }

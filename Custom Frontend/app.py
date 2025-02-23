@@ -8,10 +8,13 @@ from sklearn.linear_model import LinearRegression
 from dotenv import load_dotenv
 from singlestoredb import connect, DatabaseError
 import sys
+<<<<<<< HEAD
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import INLINE
 from bokeh.models import ColumnDataSource, HoverTool
+=======
+>>>>>>> 1f7c537c67de96488fe5fb64c74c7d0b868e889a
 
 # Load environment variables
 load_dotenv()
@@ -193,6 +196,7 @@ def predict():
 def resources():
     return render_template('resources.html')
 
+<<<<<<< HEAD
 @app.route('/chart')
 def chart():
     try:
@@ -279,6 +283,8 @@ def chart():
         print(f"Error generating chart: {str(e)}")
         return redirect('/')
 
+=======
+>>>>>>> 1f7c537c67de96488fe5fb64c74c7d0b868e889a
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port)
