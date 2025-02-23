@@ -262,6 +262,45 @@ if tab == "Home" or tab == None:
         <p><strong>📏Altitude:</strong> {elevation:.2f} meters</p>
     </div>
 """, unsafe_allow_html=True)
+    
+    # Ensure values are valid before sending them to the next page
+    if flooding_year and years_until:
+        predict_url = f"https://your-second-website.com?lat={lat}&lon={lon}&elevation={elevation:.2f}&flood_year={flooding_year}&years_until={years_until}"
+    else:
+        predict_url = None
+
+    # Predict Button (styled)
+    st.markdown("""
+        <style>
+        .predict-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .predict-button a {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s ease-in-out;
+        }
+        .predict-button a:hover {
+            background-color: #0056b3;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if predict_url:
+        st.markdown(f"""
+            <div class="predict-button">
+                <a href="{predict_url}" target="_blank">🔮 Predict</a>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("Please select a valid location to enable predictions.")
 
     st.markdown("""
         <p style='text-align: center;'>Please click on the map.</p>
