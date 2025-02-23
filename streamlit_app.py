@@ -38,7 +38,7 @@ st.markdown("""
         left: 0;
         right: 0;
         width: 100%;
-        padding: 10px 0;
+        padding: 20px 0;
         z-index: 10000 !important; 
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 
