@@ -335,7 +335,7 @@ elif tab == "resources":
         """
         ## Interactive Sea Level Rise Simulator
         This graph shows the rise in sea levels over time. 
-        You can drag the point on the line to see the exact sea level at a given year.
+        You can hover over a point on the line to see the exact sea level at a given year.
         """
     )
 
