@@ -301,32 +301,34 @@ def chat_message():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
-        print("Making API call to Groq...")
-        client = groq.Groq(
-            api_key=GROQ_API_KEY,
-            base_url="https://api.groq.com/v1"
-        )
-        response = client.chat.completions.create(
-            model="mixtral-8x7b-32768",
+        print(f"Making API call to Groq with key: {GROQ_API_KEY[:10]}...")
+        
+        # Initialize Groq client with API key
+        client = groq.Groq(api_key=GROQ_API_KEY)
+        
+        print("Sending message to Groq API...")
+        chat_completion = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant specializing in sea level rise and climate change."
+                    "content": "You are a helpful assistant specializing in sea level rise and climate change. Provide clear, concise responses."
                 },
                 {
                     "role": "user",
                     "content": message
                 }
             ],
+            model="mixtral-8x7b-32768",
             temperature=0.7,
-            max_tokens=1024
+            max_tokens=300  # Reduced from 1024 to 300 for more concise responses
         )
         
-        if not response.choices:
+        print("Response received from Groq")
+        if not chat_completion.choices:
             print("No choices in response")
             return jsonify({"error": "No response from AI service"}), 500
             
-        response_text = response.choices[0].message.content
+        response_text = chat_completion.choices[0].message.content
         if not response_text:
             print("Empty response text")
             return jsonify({"error": "Empty response from AI service"}), 500
@@ -335,7 +337,7 @@ def chat_message():
         return jsonify({"response": response_text})
 
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error in chat_message: {str(e)}")
         return jsonify({
             "error": f"An error occurred: {str(e)}"
         }), 500
