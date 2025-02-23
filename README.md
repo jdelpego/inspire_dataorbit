@@ -1,42 +1,40 @@
-# 🏈 NFL Head Injury Data Visualization Project
+Flood Prediction App
+A Streamlit-based web application to predict the flooding year and time remaining until submersion for a given location. The app takes latitude, longitude, elevation, and relevant flooding data to provide predictions based on the provided parameters.
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Data Analysis](https://img.shields.io/badge/Data-Analysis-green)](https://pandas.pydata.org/)
-[![Visualization](https://img.shields.io/badge/Visualization-Plotly-ff69b4)](https://plotly.com/)
+Features
+Location Details: Displays latitude, longitude, and sea level information.
+Flood Prediction: Shows the submersion year and the estimated time remaining until the flooding occurs.
+Interactive Map: (Optional) View and explore the location's flooding prediction on a map.
+Customizable Inputs: Enter location data via URL query parameters to dynamically update predictions.
+Disclaimer: Notifications to inform users that predictions can vary based on external factors not measured in the model.
+Installation
+To run the app locally, clone the repository and install the necessary dependencies:
+bash
+Copy
+Edit
+git clone https://github.com/yourusername/flood-prediction-app.git
+cd flood-prediction-app
+pip install -r requirements.txt
+Requirements
+Python 3.x
+Streamlit
+Other Python dependencies (refer to requirements.txt)
 
-## 🎯 Project Overview
+2. Input Parameters
+The app retrieves the following query parameters via the URL:
 
-This project aims to analyze and visualize NFL head injury data to better understand the impact and patterns of head injuries in professional football. Through interactive visualizations and comprehensive data analysis, we provide insights into player safety, injury trends, and potential preventive measures.
+lat: Latitude of the location (e.g., lat=40.7128).
+lon: Longitude of the location (e.g., lon=-74.0060).
+elevation: Sea level in meters (e.g., elevation=10.5).
+flooding_year: Predicted flooding year (e.g., flooding_year=2050).
+years_until: Years remaining until flooding occurs (e.g., years_until=25).
 
-## 🌟 Key Features
+3. Viewing Predictions
+The app will display the coordinates, sea level, submersion year, and time remaining based on the provided parameters.
+A visual disclaimer is included to remind users that predictions may vary.
 
-- **Interactive Dashboards**: Dynamic visualizations of head injury statistics
-- **Temporal Analysis**: Track injury patterns across seasons
-- **Position-based Insights**: Analyze injury distribution across player positions
-- **Impact Assessment**: Evaluate severity and recovery patterns
-- **Preventive Insights**: Data-driven recommendations for player safety
-
-## 📊 Data Visualization Examples
-
-<div align="center">
-  <img src="assets/dashboard_preview.png" alt="Dashboard Preview" width="600"/>
-</div>
-
-## 🛠️ Technologies Used
-
-_Coming soon_
-
-## 🚀 Getting Started
-
-_Installation instructions and prerequisites will be added upon project completion_
-
-## 📈 Project Structure
-
-_Project structure will be updated as development progresses_
-
-## 📊 Key Findings
-
-_Key findings will be added as analysis is completed_
+Disclaimer
+Predictions made by this model are based on limited data and assumptions. External factors not included in the model may affect predictions. Use the predictions as estimates and for informational purposes only.
 
 ## 👥 Team Members
 
