@@ -118,7 +118,7 @@ def predict_flooding_year(altitude_mm, model, future_X, base_sea_level, start_ye
         return None, None
     
     flooding_year = int(years_needed[flooding_levels][0])
-    years_until_flooding = int((flooding_year - start_year) * 2.5)  # Multiply by 2.5x to match Streamlit
+    years_until_flooding = int((flooding_year - start_year))  # Multiply by 2.5x to match Streamlit
     
     return flooding_year, years_until_flooding
 
