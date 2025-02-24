@@ -48,7 +48,7 @@ def get_elevation(lat, lng):
     else:
         raise Exception("Error getting elevation: non-200 response")
 
-CUTOFF_YEAR = 2100  # Year when sea level transitions to constant linear rise
+CUTOFF_YEAR = 2065  # Year when sea level transitions to constant linear rise
 
 def calculate_cutoff_slope(model, cutoff_year, last_emission, emissions_growth_rate, last_year):
     """Calculate the slope at the cutoff year for linear extrapolation"""
