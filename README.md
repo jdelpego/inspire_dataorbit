@@ -1,4 +1,8 @@
-🌊 Sea Level Rise Prediction App
+🌊 Sea Level Rise Predictor
+
+<img width="1512" alt="Screenshot 2025-03-10 at 8 30 31 AM" src="https://github.com/user-attachments/assets/e2d92e9e-267f-4483-94f9-11053fa268e7" />
+
+View the demo at: https://devpost.com/software/team-inspire
 
 📌 Overview
 
@@ -14,35 +18,7 @@ User clicks on a location on the interactive map. Elevation is retrieved using t
 
 🛠️ Technologies Used
 
-Python (Streamlit, Pandas, NumPy, Scikit-learn), Folium (for interactive maps), Google Maps Elevation API (to get real-world elevation data), SingleStoreDB (for data storage), Machine Learning (Polynomial Regression for predictions)
-
-🔧 Setup & Installation
-
-Prerequisites
-
-Python 3.x
-
-pip (Python package manager)
-
-Installation Steps
-
-Clone this repository:
-
-git clone https://github.com/yourusername/sea-level-predictor.git
-cd sea-level-predictor
-
-Install dependencies:
-
-pip install -r requirements.txt
-
-Add your Google Maps API Key to secrets.toml:
-
-[api_key]
-google_maps_api_key = "YOUR_API_KEY"
-
-Run the application:
-
-streamlit run app.py
+Python (Streamlit, Pandas, NumPy, Scikit-learn), Flask, Folium (for interactive maps), Google Maps Elevation API (to get real-world elevation data), SingleStoreDB (for data storage), Machine Learning (Polynomial Regression for predictions)
 
 📖 Data Sources: NOAA Sea Level Data, Global CO2 Emissions Data, Google Maps Elevation API
 
